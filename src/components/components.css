@@ -1,0 +1,12 @@
+
+.btn, .btn:hover, .btn:active, .btn:visited {
+    background-color: #ff4949 !important;
+    border-radius: 20px;
+    color: white;
+    margin: 10px;
+}
+
+.App-logo{
+    max-width: 35%;
+    height: auto;
+}
