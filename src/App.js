@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import {BrowserRouter as Router, Route, Link} from "react-router-dom";
 import './App.css';
 import LandingPage from "./components/landingpage.component";
+import Registration from "./components/Registration/Registration";
 
 
 function App() {
@@ -20,14 +21,14 @@ function App() {
                                 <Link to="/" className="nav-link">Help</Link>
                             </li>
                             <li className="navbar-item">
-                                <Link to="/" className="nav-link">Profile</Link>
+                                <Link to="/register" className="nav-link">Registration</Link>
                             </li>
                         </ul>
-
                     </div>
                 </nav>
                 <main>
                     <Route path="/" exact component={LandingPage} />
+                    <Route path="/register" exact component={Registration} />
                 </main>
             </div>
         </Router>

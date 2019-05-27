@@ -1,9 +1,9 @@
 
 .btn, .btn:hover, .btn:active, .btn:visited {
     background-color: #ff4949 !important;
+    border-color: #ff4949 !important;
     border-radius: 20px;
     color: white;
-    margin: 10px;
 }
 
 .App-logo{
