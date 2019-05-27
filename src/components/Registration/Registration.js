@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import RegistratiomForm from '../RegistrationForm/RegistrationForm';
-import { FirebaseContext } from '../Firebase';
 
 const Registration = (props) => {
+  const { history } = props;
+
   return (
     <div className="container mt-5">
       <h2>Registration</h2>
-      <FirebaseContext.Consumer>
-        {(firebase) => <RegistratiomForm firebase={firebase} />}
-      </FirebaseContext.Consumer>
+      <RegistratiomForm history={history} />
     </div>
   );
 };
