@@ -2,8 +2,11 @@
 
 Online Applikation zum finden hungriger Kommilitonen zum gemeinsamen Mensen.
 
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Copy `.env` file to root folder
+
+Get the file from the slack channel and paste it here.
 
 ## Available Scripts
 
