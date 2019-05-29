@@ -2,7 +2,7 @@
 .btn, .btn:hover, .btn:active, .btn:visited {
     background-color: #dc4b4c !important;
     border-color: #dc4b4c !important;
-    border-radius: 10px;
+    border-radius: 5px;
     color: white;
 }
 
@@ -10,3 +10,4 @@
     max-width: 35%;
     height: auto;
 }
+
