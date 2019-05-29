@@ -5,6 +5,7 @@ import './App.css';
 import LandingPage from './components/landingpage.component';
 import Registration from './components/Registration/Registration';
 import { withFirebase } from './components/Firebase';
+import Login from './components/Login/Login';
 
 const App = (props) => {
   const { firebase } = props;
@@ -22,18 +23,30 @@ const App = (props) => {
   });
 
   let registerLink;
+  let loginLink;
 
   if (!isAuthenticated) {
     registerLink = (
-      <Link to="/register" className="nav-link">
-        Registration
-      </Link>
+      <li className="navbar-item">
+        <Link to="/login" className="nav-link">
+          Login
+        </Link>
+      </li>
+    );
+    loginLink = (
+      <li className="navbar-item">
+        <Link to="/register" className="nav-link">
+          Register
+        </Link>
+      </li>
     );
   } else {
     registerLink = (
-      <Link to="/" className="btn" onClick={logout}>
-        Logout
-      </Link>
+      <li className="navbar-item">
+        <Link to="/" className="btn" onClick={logout}>
+          Logout
+        </Link>
+      </li>
     );
   }
 
@@ -56,13 +69,15 @@ const App = (props) => {
                   Help
                 </Link>
               </li>
-              <li className="navbar-item">{registerLink}</li>
+              {registerLink}
+              {loginLink}
             </ul>
           </div>
         </nav>
         <main>
           <Route path="/" exact component={LandingPage} />
           <Route path="/register" exact component={Registration} />
+          <Route path="/login" exact component={Login} />
         </main>
       </div>
     </Router>
