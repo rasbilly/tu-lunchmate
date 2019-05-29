@@ -2,7 +2,7 @@
 .btn, .btn:hover, .btn:active, .btn:visited {
     background-color: #dc4b4c !important;
     border-color: #dc4b4c !important;
-    border-radius: 40px;
+    border-radius: 10px;
     color: white;
 }
 
