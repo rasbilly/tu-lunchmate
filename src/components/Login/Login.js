@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { withFirebase } from '../Firebase';
+import {withRouter} from "react-router-dom";
+import {compose} from "recompose";
 
 const Login = (props) => {
   const { firebase, history } = props;
