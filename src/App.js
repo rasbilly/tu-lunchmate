@@ -6,6 +6,9 @@ import LandingPage from './components/landingpage.component';
 import Registration from './components/Registration/Registration';
 import { withFirebase } from './components/Firebase';
 import Login from './components/Login/Login';
+import Profile from "./components/Profile/Profile";
+import Admin from "./components/Admin";
+import Main from "./components/Main";
 
 const App = (props) => {
   const { firebase } = props;
@@ -75,9 +78,12 @@ const App = (props) => {
           </div>
         </nav>
         <main>
-          <Route path="/" exact component={LandingPage} />
-          <Route path="/register" exact component={Registration} />
-          <Route path="/login" exact component={Login} />
+          <Route exact path="/" component={LandingPage} />
+          <Route exact path="/register" component={Registration} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/main" component={Main} />
+          <Route exact path="/profile" component={Profile} />
+          <Route exact path="/admin" component={Admin} />
         </main>
       </div>
     </Router>
