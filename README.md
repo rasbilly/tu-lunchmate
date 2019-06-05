@@ -8,6 +8,18 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Get the file from the slack channel and paste it here.
 
+## Set up Firebase
+
+Run
+
+```npm install -g firebase-tools```
+
+and 
+
+```firebase login```
+
+Now you're good to go to start the React App
+
 ## Available Scripts
 
 In the project directory, you can run:
