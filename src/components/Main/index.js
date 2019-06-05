@@ -1,4 +1,6 @@
 import React from 'react';
+import withAuthorization from "../Session/authorization";
+import {compose} from "recompose";
 
 const Main = () => (
     <div>
@@ -6,4 +8,7 @@ const Main = () => (
     </div>
 );
 
-export default Main;
+const authenticated = authUser => !!authUser;
+export default compose(
+    withAuthorization(authenticated),
+)(Main);

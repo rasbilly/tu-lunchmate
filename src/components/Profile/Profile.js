@@ -1,4 +1,6 @@
 import React from 'react';
+import {compose} from "recompose";
+import withAuthorization from "../Session/authorization";
 
 const Profile = () => (
     <div>
@@ -6,4 +8,7 @@ const Profile = () => (
     </div>
 );
 
-export default Profile;
+const authenticated = authUser => !!authUser;
+export default compose(
+    withAuthorization(authenticated),
+)(Profile);

@@ -26,16 +26,15 @@ class Firebase {
   signOut = () => this.auth.signOut();
   resetPassword = email => this.auth.sendPasswordResetEmail(email);
   updatePassword = password => this.auth.currentUser.updatePassword(password);
-  //get user from db and merge into object to store in cache
+  //get user from db and combine with object to store in cache
   onAuthUserListener = (next, fallback) =>
       this.auth.onAuthStateChanged(authUser => {
         if (authUser) {
           this.user(authUser.uid)
-              .get()
               .then(snapshot => {
                 const dbUser = snapshot.data();
                 // default empty roles
-                if (!dbUser.isAdmin) {
+                if (dbUser.isAdmin==null) {
                   dbUser.isAdmin = false;
                 }
                 // merge auth and db user
@@ -52,7 +51,7 @@ class Firebase {
       });
 
   //Get user
-  user = uid => this.db.collection("users").get(uid)
+  user = uid => this.db.collection("users").doc(uid).get()
 
 }
 

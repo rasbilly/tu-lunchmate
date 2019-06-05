@@ -1,16 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import AuthUserContext from '../Session/context';
+import {AuthUserContext} from '../Session';
+import LogoutLink from "../Login/Logout";
 
 const Navigation = () => (
     <AuthUserContext.Consumer>
         {authUser =>
-            authUser ? (
-                <NavigationAuth authUser={authUser} />
-            ) : (
-                <NavigationNonAuth />
-            )
+            authUser ? (<NavigationAuth authUser={authUser} />) : (<NavigationNonAuth />)
         }
     </AuthUserContext.Consumer>
 );
@@ -27,7 +24,7 @@ const NavigationAuth = ({ authUser }) => (
                 </li>
                 {authUser.isAdmin && (
                     <li>
-                        <Link to="/admin">Admin</Link>
+                        <Link to="/admin" className="nav-link">Admin</Link>
                     </li>
                 )}
                 <li className="navbar-item">
@@ -36,9 +33,7 @@ const NavigationAuth = ({ authUser }) => (
                     </Link>
                 </li>
                 <li className="navbar-item">
-                    <Link to="/login" className="nav-link">
-                        Log out
-                    </Link>
+                    <LogoutLink/>
                 </li>
             </ul>
         </div>
