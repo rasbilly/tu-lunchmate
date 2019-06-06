@@ -1,6 +1,7 @@
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore'
+import 'firebase/storage'
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,13 +12,14 @@ const config = {
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDERID,
 };
 
-const defprofilepic = "gs://tu-lunchmate.appspot.com/profile_pictures/default.png";
+const defprofilepicRef = "profile_pictures/default.png";
 
 class Firebase {
   constructor() {
     app.initializeApp(config);
     this.auth = app.auth();
     this.db = app.firestore();
+    this.storage = app.storage();
   }
 
       //Auth functions
@@ -75,8 +77,21 @@ class Firebase {
         });
     setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
         displayName: name,
-        photoURL: (photoURL) ? photoURL : defprofilepic
-    }).then()
+        photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
+    }).then(function () {
+        console.log("Profile successfully updated");
+    });
+    //get profile pic url from db location
+    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser).getDownloadURL();
+    //get default profile pic url
+    defaultProfilePicUrl = () => this.storage.ref(defprofilepicRef).getDownloadURL();
+    //upload pic and get profile pic url in return
+    uploadProfilePic = (picture) => this.storage.ref('profile_pictures/'+this.auth.currentUser.uid).put(picture).then(function (snapshot) {
+        console.log("Profile pic successfully uploaded");
+        return snapshot.ref.getDownloadURL()
+    }).catch(function (err) {
+        console.error("Error while uploading:",err);
+    });
 }
 
 export default Firebase;
