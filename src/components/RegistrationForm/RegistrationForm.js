@@ -16,6 +16,7 @@ const RegistrationForm = (props) => {
     }
     firebase.createUser(email, password).then(() => {
       const user = firebase.auth.currentUser;
+      firebase.createUserInDB(user.uid);
       user.updateProfile({ displayName: name });
       history.push('/');
     });
