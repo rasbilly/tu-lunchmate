@@ -2,6 +2,7 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore'
 import 'firebase/storage'
+import * as firebase from "firebase";
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,6 +12,8 @@ const config = {
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDERID,
 };
+
+const lunches = lunches;
 
 const defprofilepicRef = "profile_pictures/default.png";
 
@@ -91,6 +94,44 @@ class Firebase {
         return snapshot.ref.getDownloadURL()
     }).catch(function (err) {
         console.error("Error while uploading:",err);
+    });
+
+    //Main page requests
+    createLunch = (title, description, interests, startTimeStamp, endTimeStamp, maxUsers, mensa) => {
+        this.db.collection(lunches).doc().set({
+            title: title,
+            description: description,
+            interests: interests,
+            startTimeStamp: firebase.firestore.Timestamp.fromDate(startTimeStamp),
+            endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
+            maxMembers: maxUsers,
+            members: [this.auth.currentUser.uid],
+            owner: this.auth.currentUser.uid,
+            mensa: mensa
+        }).then(function () {
+            console.log("lunch successfully added!")
+        }).catch(function (error) {
+            console.log("Failed to add lunch", error)
+        })
+    };
+    getJoinedLunches = () => this.db.collection(lunches)
+        .where("members","array_contains",this.auth.currentUser.uid)
+        .get().then(function () {
+            //TODO
+        }).catch(function (error) {
+            console.log("Error getting lunches",error)
+        });
+    getOwnLunches = () => this.db.collection(lunches)
+        .where("owner","==",this.auth.currentUser.uid)
+        .get().then(function (snapshot) {
+            //TODO
+        }).catch(function (error) {
+            console.log("Error getting lunches",error)
+        });
+    deleteLunch = (lunchID) => this.db.collection(lunches).doc(lunchID).delete().then(function () {
+        console.log("lunch successfully deleted");
+    }).catch(function (error) {
+        console.log("error deleting lunch",error);
     });
 }
 
