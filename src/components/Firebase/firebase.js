@@ -1,6 +1,7 @@
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore'
+import 'firebase/storage'
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,48 +12,86 @@ const config = {
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDERID,
 };
 
+const defprofilepicRef = "profile_pictures/default.png";
+
 class Firebase {
   constructor() {
     app.initializeApp(config);
     this.auth = app.auth();
     this.db = app.firestore();
+    this.storage = app.storage();
   }
 
-  //Auth functions
-  createUser = (email, password) =>
-    this.auth.createUserWithEmailAndPassword(email, password);
-  signIn = (email, password) =>
-    this.auth.signInWithEmailAndPassword(email, password);
-  signOut = () => this.auth.signOut();
-  resetPassword = email => this.auth.sendPasswordResetEmail(email);
-  updatePassword = password => this.auth.currentUser.updatePassword(password);
-  //get user from db and combine with object to store in cache
-  onAuthUserListener = (next, fallback) =>
-      this.auth.onAuthStateChanged(authUser => {
-        if (authUser) {
-          this.user(authUser.uid)
-              .then(snapshot => {
-                const dbUser = snapshot.data();
-                // default empty roles
-                if (dbUser.isAdmin==null) {
-                  dbUser.isAdmin = false;
-                }
-                // merge auth and db user
-                authUser = {
-                  uid: authUser.uid,
-                  email: authUser.email,
-                  ...dbUser,
-                };
-                next(authUser);
-              });
-        } else {
-          fallback();
-        }
-      });
+      //Auth functions
+      signIn = (email, password) =>
+        this.auth.signInWithEmailAndPassword(email, password);
+      signOut = () => this.auth.signOut();
+      resetPassword = email => this.auth.sendPasswordResetEmail(email);
+      updatePassword = password => this.auth.currentUser.updatePassword(password);
+      //get user from db and combine with object to store in cache
+      onAuthUserListener = (next, fallback) =>
+          this.auth.onAuthStateChanged(authUser => {
+            if (authUser) {
+              this.user(authUser.uid)
+                  .then(snapshot => {
+                    const dbUser = snapshot.data();
+                    // default empty roles
+                    if (dbUser.isAdmin==null) {
+                      dbUser.isAdmin = false;
+                    }
+                    // merge auth and db user
+                    authUser = {
+                      uid: authUser.uid,
+                      email: authUser.email,
+                      ...dbUser,
+                    };
+                    next(authUser);
+                  });
+            } else {
+              fallback();
+            }
+          });
 
-  //Get user
-  user = uid => this.db.collection("users").doc(uid).get()
+    //Get user
+    user = uid => this.db.collection("users").doc(uid).get();
+    //Get list of majors
+    majors = () => this.db.collection("majors").get();
+    //Get Interests
+    interests = () => this.db.collection("interests").get();
 
+    //Registration functions
+    createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
+    createUserInDB = (uid) => this.db.collection("users").doc(uid).set({}).then(function() {
+        console.log("User created in db");
+    }).catch(function(error) {
+            console.error("Error creating user: ", error);
+    });
+    setUserBio =  (major, interests) => this.db.collection("users").doc(this.auth.currentUser.uid)
+        .set({
+            major: major,
+            interests: interests
+        }).then(function () {
+            console.log("User Bio updated");
+        }).catch(function (error) {
+            console.error("Error updating bio:",error);
+        });
+    setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
+        displayName: name,
+        photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
+    }).then(function () {
+        console.log("Profile successfully updated");
+    });
+    //get profile pic url from db location
+    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser).getDownloadURL();
+    //get default profile pic url
+    defaultProfilePicUrl = () => this.storage.ref(defprofilepicRef).getDownloadURL();
+    //upload pic and get profile pic url in return
+    uploadProfilePic = (picture) => this.storage.ref('profile_pictures/'+this.auth.currentUser.uid).put(picture).then(function (snapshot) {
+        console.log("Profile pic successfully uploaded");
+        return snapshot.ref.getDownloadURL()
+    }).catch(function (err) {
+        console.error("Error while uploading:",err);
+    });
 }
 
 export default Firebase;
