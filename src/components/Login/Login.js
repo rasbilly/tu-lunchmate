@@ -1,70 +1,89 @@
-import React, { useState } from 'react';
+import React, {Component} from 'react';
 import { withFirebase } from '../Firebase';
-import {withRouter} from "react-router-dom";
+import {Grid, CssBaseline,Link,Button,TextField,
+  Typography,Avatar,Container} from "@material-ui/core";
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
-const Login = (props) => {
-  const { firebase, history } = props;
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [alertMessage, setalertMessage] = useState('');
+class Login extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: ''
+    };
+  }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    firebase
-      .signIn(email, password)
+  handleSubmit = e => {
+    console.log("email: "+this.state.email);
+    e.preventDefault();
+    this.props.firebase
+      .signIn(this.state.email, this.state.password)
       .then(() => {
-        this.history.push('/main'); //TODO: not working!
+        this.props.history.push('/main');
       })
       .catch((error) => {
-        setalertMessage(error.message);
+        console.error("error:",error);
       });
   };
+  onChange = event => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
 
-  firebase.auth.onAuthStateChanged((user) => {
-    if (user) {
-      history.push('/');
-    }
-  });
-  return (
-    <div className="container mt-5">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email">E-Mail Adresse</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            required="required"
-            placeholder="E-Mail eingeben"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Passwort</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            required
-            placeholder="Passwort"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div
-          className={`alert alert-danger ${alertMessage ? '' : 'd-none'}`}
-          role="alert"
-        >
-          {alertMessage}
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Submit
-        </button>
-      </form>
-    </div>
-  );
-};
+  render() {
+    return (
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div>
+            <Avatar>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Login
+            </Typography>
+            <form noValidate onSubmit={this.handleSubmit}>
+              <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  autoFocus
+                  onChange={this.onChange}
+              />
+              <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  onChange={this.onChange}
+              />
+              <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary">
+                Sign In
+              </Button>
+              <Grid container justify="center" direction="column" alignItems='center'>
+                <Grid item  xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+              </Grid>
+            </form>
+          </div>
+        </Container>
+    );
+  }
+}
 
 export default withFirebase(Login);
