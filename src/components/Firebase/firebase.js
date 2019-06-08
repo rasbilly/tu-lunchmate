@@ -14,6 +14,7 @@ const config = {
 };
 
 const lunches = "lunches";
+const users = "users";
 const increment = firebase.firestore.FieldValue.increment(1);
 const decrement = firebase.firestore.FieldValue.increment(-1);
 
@@ -58,7 +59,7 @@ class Firebase {
           });
 
     //Get user
-    user = uid => this.db.collection("users").doc(uid).get();
+    user = uid => this.db.collection(users).doc(uid).get();
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
@@ -66,8 +67,8 @@ class Firebase {
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
-    createUserInDB = (uid) => this.db.collection("users").doc(uid).set({});
-    setUserBio =  (major, interests) => this.db.collection("users").doc(this.auth.currentUser.uid)
+    createUserInDB = (uid) => this.db.collection(users).doc(uid).set({});
+    setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
         .set({
             major: major,
             interests: interests
@@ -129,7 +130,63 @@ class Firebase {
             memberCount: decrement,
             members: firebase.firestore.FieldValue.arrayRemove(uid)
         });
-    }
+    };
+    getFreeLunches = () => {
+        this.db.collection(lunches).get().then(function (snapshot) {
+            const lunchList = snapshot.docs;
+            const freeLunches = [];
+            lunchList.some(function (lunch) {
+                if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
+                    if (lunch.memberCount<=lunch.maxMembers){
+                        freeLunches.push(lunch);
+                    }
+                }
+            });
+            return freeLunches;
+        }).catch(function (error) {
+            console.error("Failed to get lunches: ",error);
+        })
+    };
+    sortLunchesByInterests = (lunches) => {
+        this.db.collection(users).doc(this.auth.currentUser.uid).get().then(function (doc) {
+            const interests = doc.data().interests;
+            return rankAndSort(interests, lunches);
+        }).catch(function (error) {
+            console.error("Failed to get user interests", error);
+        })
+    };
+}
+/*
+sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
+is obviously better than [Sports, Photography] and [Sports, Gaming]
+ */
+function rankAndSort(interests, lunches) {
+    lunches.some(function(lunch) {
+        let similarities = 0;
+        if(lunch.hasOwnProperty("interests")){
+            const lunchInterests = lunch.interests;
+            lunchInterests.forEach(function (item) {
+                if(interests.includes(item)){
+                    similarities++;
+                }
+            });
+            lunch.similarity = similarities;
+        } else lunch.similarity = 0;
+    });
+    lunches.sort((a, b) => (a.similarity > b.similarity) ? -1 : 1);
+    return lunches;
+}
+
+function filterByUserCount(min, max, lunches) {
+    const newList = [];
+    lunches.some(function (lunch) {
+        if (lunch.hasOwnProperty("maxMembers")) {
+            if (lunch.maxMembers<=max&&lunch.maxMembers>=min){
+                newList.push(lunch);
+            }
+        }
+    });
+    return newList;
 }
 
 export default Firebase;
