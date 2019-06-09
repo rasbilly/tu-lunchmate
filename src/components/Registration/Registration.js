@@ -5,6 +5,11 @@ import ProfilePicForm from "./ProfilePicForm";
 import InterestsForm from "./InterestsForm";
 
 const useStyles = makeStyles(theme => ({
+    '@global': {
+        body: {
+            backgroundColor: theme.palette.common.white,
+        },
+    },
     appBar: {
         position: 'relative',
     },

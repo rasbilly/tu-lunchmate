@@ -20,30 +20,23 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function Navigation (props) {
+function Navigation (props) {
     const classes = useStyles();
-    const {history} = props;
+    const {firebase} = props;
     return(
         <AuthUserContext.Consumer>
             {authUser =>
-                authUser ? (<NavigationAuth authUser={authUser} classes={classes}/>) : (<NavigationNonAuth classes={classes} history={history}/>)
+                authUser ? (<NavigationAuth authUser={authUser} classes={classes} firebase={firebase}/>) : (<NavigationNonAuth classes={classes}/>)
             }
         </AuthUserContext.Consumer>
     );
 };
 
-function NavigationAuth ({authUser, classes}, firebase) {
+function NavigationAuth ({authUser, classes, firebase}) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     function handleMenu(event) {
         setAnchorEl(event.currentTarget);
-    }
-    function handleClose() {
-        setAnchorEl(null);
-    }
-    function handleProfile(history) {
-        setAnchorEl(null);
-        history.push('/profile')
     }
     return (
         <div className={classes.root}>
@@ -91,7 +84,8 @@ function NavigationAuth ({authUser, classes}, firebase) {
                             <Route render={({history}) => (
                                 <MenuItem onClick={()=>{
                                     setAnchorEl(null);
-                                    history.push('/'); //TODO: Sign out
+                                    firebase.signOut();
+                                    history.push('/');
                                 }}>
                                     <ListItemIcon> <ExitToApp/> </ListItemIcon>
                                     Sign out
@@ -137,3 +131,5 @@ const AdminBtn = () => (
         </Button>
     )} />
 );
+
+export default withFirebase(Navigation);
