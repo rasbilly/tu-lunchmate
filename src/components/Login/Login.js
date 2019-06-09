@@ -1,89 +1,108 @@
-import React, {Component} from 'react';
+import React, { useState } from 'react';
 import { withFirebase } from '../Firebase';
-import {Grid, CssBaseline,Link,Button,TextField,
-  Typography,Avatar,Container} from "@material-ui/core";
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import {Container, CssBaseline, Button, Typography,
+    TextField, Grid, Link, Avatar} from "@material-ui/core";
+import icon from "../../img/roundedicon.png";
 
-class Login extends Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      password: ''
+const useStyles = makeStyles(theme => ({
+    '@global': {
+        body: {
+            backgroundColor: theme.palette.common.white,
+        },
+    },
+    paper: {
+        marginTop: theme.spacing(8),
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    bigAvatar: {
+        width: 60,
+        height: 60,
+        margin: theme.spacing(1),
+        backgroundColor: theme.palette.secondary.main,
+    },
+    form: {
+        width: '100%', // Fix IE 11 issue.
+        marginTop: theme.spacing(1),
+    },
+    submit: {
+        margin: theme.spacing(3, 0, 2),
+    },
+}));
+
+function SignIn(props) {
+    const { firebase, history } = props;
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [alertMessage, setalertMessage] = useState('');
+    const classes = useStyles();
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        firebase
+            .signIn(email, password)
+            .then(() => {
+                history.push('/main');
+            })
+            .catch((error) => {
+                setalertMessage(error.message);
+            });
     };
-  }
 
-  handleSubmit = e => {
-    console.log("email: "+this.state.email);
-    e.preventDefault();
-    this.props.firebase
-      .signIn(this.state.email, this.state.password)
-      .then(() => {
-        this.props.history.push('/main');
-      })
-      .catch((error) => {
-        console.error("error:",error);
-      });
-  };
-  onChange = event => {
-    this.setState({ [event.target.name]: event.target.value });
-  };
 
-  render() {
     return (
         <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <div>
-            <Avatar>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Login
-            </Typography>
-            <form noValidate onSubmit={this.handleSubmit}>
-              <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                  onChange={this.onChange}
-              />
-              <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  onChange={this.onChange}
-              />
-              <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary">
-                Sign In
-              </Button>
-              <Grid container justify="center" direction="column" alignItems='center'>
-                <Grid item  xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
-              </Grid>
-            </form>
-          </div>
+            <CssBaseline />
+            <div className={classes.paper}>
+                <Avatar className={classes.bigAvatar} alt="Lunchmate Icon" src={icon} />
+                <Typography component="h1" variant="h5">
+                    Login
+                </Typography>
+                <form className={classes.form} onSubmit={handleSubmit} noValidate>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        onChange={(e) => setEmail(e.target.value)}
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        id="password"
+                        autoComplete="current-password"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}>
+                        Sign In
+                    </Button>
+                    <Grid container alignItems='center' direction='column'>
+                        <Grid item xs>
+                            <Link href="#" variant="body2">
+                                Forgot password? Click here
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </form>
+            </div>
         </Container>
     );
-  }
 }
-
-export default withFirebase(Login);
+export default withFirebase(SignIn);
