@@ -1,73 +1,135 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 import {AuthUserContext} from '../Session';
-import LogoutLink from "../Login/Logout";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import {AppBar, Toolbar, Typography, Button, MenuItem, Menu, IconButton, ListItemIcon} from "@material-ui/core";
+import { Route } from 'react-router-dom'
+import {AccountCircle, ExitToApp, AccessibilityNew} from '@material-ui/icons'
+import {withFirebase} from "../Firebase";
 
-const Navigation = () => (
-    <AuthUserContext.Consumer>
-        {authUser =>
-            authUser ? (<NavigationAuth authUser={authUser} />) : (<NavigationNonAuth />)
-        }
-    </AuthUserContext.Consumer>
-);
+const useStyles = makeStyles(theme => ({
+    root: {
+        flexGrow: 1
+    },
+    menuButton: {
+        marginRight: theme.spacing(2),
+    },
+    title: {
+        flexGrow: 1,
+    },
+}));
 
-const NavigationAuth = ({ authUser }) => (
-    <nav className="navbar navbar-expand-lg">
-        <Link to="/" className="navbar-brand">Lunchmate</Link>
-        <div className="navbar-collapse collapse justify-content-end">
-            <ul className="navbar-nav navbar-right">
-                <li className="navbar-item">
-                    <Link to="/main" className="nav-link">
-                        Main Page
-                    </Link>
-                </li>
-                {authUser.isAdmin && (
-                    <li>
-                        <Link to="/admin" className="nav-link">Admin</Link>
-                    </li>
-                )}
-                <li className="navbar-item">
-                    <Link to="/profile" className="nav-link">
-                        Profile
-                    </Link>
-                </li>
-                <li className="navbar-item">
-                    <LogoutLink/>
-                </li>
-            </ul>
+
+function Navigation (props) {
+    const classes = useStyles();
+    const {firebase} = props;
+    return(
+        <AuthUserContext.Consumer>
+            {authUser =>
+                authUser ? (<NavigationAuth authUser={authUser} classes={classes} firebase={firebase}/>) : (<NavigationNonAuth classes={classes}/>)
+            }
+        </AuthUserContext.Consumer>
+    );
+};
+
+function NavigationAuth ({authUser, classes, firebase}) {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    function handleMenu(event) {
+        setAnchorEl(event.currentTarget);
+    }
+    return (
+        <div className={classes.root}>
+            <AppBar position="static">
+                <Toolbar>
+                    <Typography variant="h6" className={classes.title}>
+                        Lunchmate
+                    </Typography>
+                    <div>
+                        {authUser.isAdmin && (
+                            <AdminBtn className={classes.menuButton}/>
+                        )}
+                        <IconButton
+                            aria-label="Account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            edge="end"
+                            onClick={handleMenu}
+                            color="inherit">
+                            <AccountCircle/>
+                        </IconButton>
+                        <Menu
+                            id="menu-appbar"
+                            anchorEl={anchorEl}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={open}
+                            onClose={()=>setAnchorEl(null)}>
+                            <Route render={({history}) => (
+                                <MenuItem onClick={() => {
+                                    setAnchorEl(null);
+                                    history.push('/profile')
+                                }}>
+                                    <ListItemIcon> <AccessibilityNew/> </ListItemIcon>
+                                    Profile
+                                </MenuItem>
+                            )} />
+                            <Route render={({history}) => (
+                                <MenuItem onClick={()=>{
+                                    setAnchorEl(null);
+                                    firebase.signOut();
+                                    history.push('/');
+                                }}>
+                                    <ListItemIcon> <ExitToApp/> </ListItemIcon>
+                                    Sign out
+                                </MenuItem>
+                            )} />
+                        </Menu>
+                    </div>
+                </Toolbar>
+            </AppBar>
         </div>
-    </nav>
+    );
+}
+
+const NavigationNonAuth = ({classes}) => (
+    <div className={classes.root}>
+        <AppBar position="static">
+            <Toolbar>
+                <Typography variant="h6" edge='start' className={classes.title }>
+                    Lunchmate
+                </Typography>
+                <LoginBtn/>
+            </Toolbar>
+        </AppBar>
+    </div>
 );
 
-const NavigationNonAuth = () => (
-    <nav className="navbar navbar-expand-lg">
-        <Link to="/" className="navbar-brand">Lunchmate</Link>
-        <div className="navbar-collapse collapse justify-content-end">
-            <ul className="navbar-nav navbar-right">
-                <li className="navbar-item">
-                    <Link to="/" className="nav-link">
-                        How It Works
-                    </Link>
-                </li>
-                <li className="navbar-item">
-                    <Link to="/" className="nav-link">
-                        Help
-                    </Link>
-                </li>
-                <li className="navbar-item">
-                    <Link to="/register" className="nav-link">
-                        Register
-                    </Link>
-                </li>
-                <li className="navbar-item">
-                    <Link to="/login" className="nav-link">
-                        Login
-                    </Link>
-                </li>
-            </ul>
-        </div>
-    </nav>
+const LoginBtn = () => (
+    <Route render={({history}) => (
+        <Button
+            color="inherit"
+            onClick={() => {history.push('/login')}}>
+            Login
+        </Button>
+    )} />
 );
 
-export default Navigation;
+const AdminBtn = () => (
+    <Route render={({history}) => (
+        <Button
+            color="inherit"
+            onClick={() => {history.push('/admin')}}>
+            Admin Dashboard
+        </Button>
+    )} />
+);
+
+export default withFirebase(Navigation);

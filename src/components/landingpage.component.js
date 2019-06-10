@@ -1,27 +1,71 @@
-import React, {Component} from 'react';
+import React from 'react';
 import logo from '../img/logo_lunchmate.png';
 import './components.css';
-import {Link} from "react-router-dom";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import {Container, Typography, Grid, Button, CssBaseline} from "@material-ui/core";
 
-{/*
-TODO flex zentrieren vertikal
-TODO Button selbe größe wie img
- */
-}
-export default class LandingPage extends Component {
-    render() {
-        return (
-            <div className="flex text-center">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <div>
-                    <Link to="/login">
-                        <button type="button" className="btn btn-lg mr-1">log in</button>
-                    </Link>
-                    <Link to="/register">
-                        <button type="button" className="btn btn-lg ml-1">register</button>
-                    </Link>
-                </div>
-            </div>
-        )
+const useStyles = makeStyles(theme => ({
+    heroContent: {
+        backgroundImage: 'url(https://i.imgur.com/tNyLbzJ.png)',
+        backgroundPosition: "center center",
+        backgroundSize: "cover",
+        padding: theme.spacing(8, 0,20),
+    },
+    heroButtons: {
+        marginTop: theme.spacing(4),
+    },
+    signInButton: {
+        color: '#ffffff',
+        borderColor: '#ffffff'
+    },
+    text: {
+        color: '#ffffff'
     }
+}));
+
+export default function LandingPage (props) {
+    const classes = useStyles();
+    return (
+        <React.Fragment>
+            <CssBaseline/>
+            <div className={classes.heroContent}>
+                <Grid container alignItems='center' direction='column'>
+                    <img src={logo} className="App-logo" alt="logo" style={
+                        {
+                            resizeMode: 'center',
+                            width: 'auto',
+                        }
+                    }/>
+                </Grid>
+                <Container maxWidth="sm">
+                    <Typography component="h1"  className={classes.text} variant="h3" align="center" color="textPrimary" gutterBottom>
+                        Lunch with your classmates.
+                    </Typography>
+                    <Typography variant="h5" align="center" className={classes.text} color="textSecondary" paragraph>
+                        Eat and talk about common interests. <br/> I have no idea what else to put in here.
+                    </Typography>
+                    <div className={classes.heroButtons}>
+                        <Grid container spacing={2} justify="center">
+                            <Grid item>
+                                    <Button variant="contained" color="primary" onClick={() => props.history.push('/register')}>
+                                        Register now
+                                    </Button>
+                            </Grid>
+                            <Grid item>
+                                <Button className={classes.signInButton} variant="outlined" color="white" onClick={() => props.history.push('/login')}>
+                                    Sign in
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </div>
+                </Container>
+            </div>
+
+            <footer className={classes.footer}>
+                <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
+                    Skalierbare Systeme 2019
+                </Typography>
+            </footer>
+        </React.Fragment>
+    );
 }
