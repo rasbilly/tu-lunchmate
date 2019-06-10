@@ -71,7 +71,7 @@ const Registration = (props) => {
   const getStepContent = (step) => {
     switch (step) {
       case 0:
-        return <RegistrationForm history={history} />;
+        return <RegistrationForm />;
       case 1:
         return <ProfilePicForm />;
       case 2:
