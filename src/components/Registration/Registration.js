@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   makeStyles,
   Typography,
@@ -8,9 +8,10 @@ import {
   Button,
   StepLabel,
 } from '@material-ui/core';
-import RegistrationForm from '../RegistrationForm/RegistrationForm';
+import RegistrationForm from './RegistrationForm';
 import ProfilePicForm from './ProfilePicForm';
 import InterestsForm from './InterestsForm';
+import {withSnackbar} from "notistack";
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -58,30 +59,76 @@ const useStyles = makeStyles((theme) => ({
 const steps = ['Account', 'Profile Info', 'Interests'];
 
 const Registration = (props) => {
-  const { history } = props;
-  const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
-  };
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
+    const { history } = props;
+    const classes = useStyles();
+    const [activeStep, setActiveStep] = React.useState(0);
+    //data vars
+        //registration form
+        const [password, setPassword] = useState('');
+        const [password2, setPassword2] = useState('');
+        const [firstName, setFirstName] = useState('');
+        const [lastName, setLastName] = useState('');
+        const [email, setEmail] = useState('');
+        //profile pic form
+        const [major, setMajor] = useState('');
+        const [croppedImage, setCroppedImage] = useState(null);
+        //interests form
+        const [clickedInterests, setClickedInterests] = useState([]);
 
-  const getStepContent = (step) => {
+
+    function submitRegistration() {
+
+    }
+
+    const handleNext = () => {
+        switch (activeStep) {
+            case 0: //clicked next on registrationform
+                if (password !== password2) {
+                    props.enqueueSnackbar('Passwörter stimmen nicht überein', 'warning');
+                } else {
+                    setActiveStep(activeStep + 1);
+                }
+                break;
+            case 1: //-"- profilepicform
+                break;
+            case 2: //interestsform
+                submitRegistration();
+                break;
+            default:
+                setActiveStep(activeStep + 1);
+                break;
+        }
+    };
+
+    const handleBack = () => {
+    setActiveStep(activeStep - 1);
+    };
+
+    const [nextDisabled, setNextDisabled] = React.useState(true);
+
+    const getStepContent = (step) => {
     switch (step) {
       case 0:
-        return <RegistrationForm history={history} />;
+        return <RegistrationForm setNextDisabled={setNextDisabled}
+                                 setEmail={setEmail}
+                                 setFirstName={setFirstName}
+                                 setLastName={setLastName}
+                                 setPW={setPassword}
+                                 setPW2={setPassword2}/>;
       case 1:
-        return <ProfilePicForm />;
+        return <ProfilePicForm  setMajor={setMajor} major={major} setCroppedImage={setCroppedImage} croppedImage={croppedImage}/>;
       case 2:
-        return <InterestsForm />;
+        return <InterestsForm setClickedInterests={setClickedInterests}/>;
       default:
         throw new Error('Unknown step');
     }
-  };
+    };
 
-  return (
+    useEffect(() => {
+        setNextDisabled(0===firstName.length||0===email.length);
+    });
+
+    return (
     <main className={classes.layout}>
       <Paper className={classes.paper}>
         <Typography component="h1" variant="h4" align="center">
@@ -106,7 +153,7 @@ const Registration = (props) => {
               {getStepContent(activeStep)}
               <div className={classes.buttons}>
                 {activeStep !== 0 && (
-                  <Button onClick={handleBack} className={classes.button}>
+                  <Button onClick={handleBack} className={classes.button} href='#'>
                     Back
                   </Button>
                 )}
@@ -114,8 +161,8 @@ const Registration = (props) => {
                   variant="contained"
                   color="primary"
                   onClick={handleNext}
-                  className={classes.button}
-                >
+                  disabled={nextDisabled}
+                  className={classes.button} href='#'>
                   {activeStep === steps.length - 1 ? 'Complete ' : 'Next'}
                 </Button>
               </div>
@@ -124,7 +171,7 @@ const Registration = (props) => {
         </React.Fragment>
       </Paper>
     </main>
-  );
+    );
 };
 
-export default Registration;
+export default withSnackbar(Registration);

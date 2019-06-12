@@ -10,20 +10,24 @@ import Admin from "./components/Admin";
 import Main from "./components/Main";
 import {withAuth} from "./components/Session";
 import Navigation from "./components/Nav/navigation";
+import { SnackbarProvider} from 'notistack';
+
 
 const App = () => {
   return (
     <Router>
       <div className="App">
-        <Navigation/>
-        <main>
-          <Route exact path="/" component={LandingPage} />
-          <Route exact path="/register" component={Registration} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/main" component={Main} />
-          <Route exact path="/profile" component={Profile} />
-          <Route exact path="/admin" component={Admin} />
-        </main>
+        <SnackbarProvider maxSnack={3}>
+          <Navigation/>
+          <main>
+            <Route exact path="/" component={LandingPage} />
+            <Route exact path="/register" component={Registration} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/main" component={Main} />
+            <Route exact path="/profile" component={Profile} />
+            <Route exact path="/admin" component={Admin} />
+          </main>
+        </SnackbarProvider>
       </div>
     </Router>
   );
