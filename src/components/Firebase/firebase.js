@@ -42,7 +42,7 @@ class Firebase {
                   .then(snapshot => {
                     const dbUser = snapshot.data();
                     // default empty roles
-                    if (dbUser.isAdmin==null) {
+                    if (dbUser && 'isAdmin' in dbUser && dbUser.isAdmin==null) {
                       dbUser.isAdmin = false;
                     }
                     // merge auth and db user
@@ -67,7 +67,10 @@ class Firebase {
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
-    createUserInDB = (uid) => this.db.collection(users).doc(uid).set({});
+    createUserInDB = (uid, major, interests) => this.db.collection(users).doc(uid).set({
+        major: major,
+        interests: interests
+    });
     setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
         .set({
             major: major,
@@ -78,7 +81,7 @@ class Firebase {
         photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
     });
     //get profile pic url from db location
-    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser).getDownloadURL();
+    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser.uid).getDownloadURL();
     //get default profile pic url
     defaultProfilePicUrl = () => this.storage.ref(defprofilepicRef).getDownloadURL();
     //upload pic and get profile pic url in return

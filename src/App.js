@@ -17,7 +17,7 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <SnackbarProvider maxSnack={3}>
+        <SnackbarProvider maxSnack={3} autoHideDuration={2000}>
           <Navigation/>
           <main>
             <Route exact path="/" component={LandingPage} />

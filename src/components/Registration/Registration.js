@@ -1,23 +1,30 @@
 import React, {useEffect, useState} from 'react';
 import {
-  makeStyles,
-  Typography,
-  Paper,
-  Step,
-  Stepper,
-  Button,
-  StepLabel,
+    makeStyles,
+    Typography,
+    Paper,
+    Step,
+    Stepper,
+    Button,
+    StepLabel, CircularProgress,
+    Container
 } from '@material-ui/core';
 import RegistrationForm from './RegistrationForm';
 import ProfilePicForm from './ProfilePicForm';
 import InterestsForm from './InterestsForm';
 import {withSnackbar} from "notistack";
+import {withFirebase} from "../Firebase";
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
     body: {
       backgroundColor: theme.palette.common.white,
     },
+  },
+  loading: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
   },
   appBar: {
     position: 'relative',
@@ -59,9 +66,10 @@ const useStyles = makeStyles((theme) => ({
 const steps = ['Account', 'Profile Info', 'Interests'];
 
 const Registration = (props) => {
-    const { history } = props;
+    const { history, firebase} = props;
     const classes = useStyles();
     const [activeStep, setActiveStep] = React.useState(0);
+    const [nextDisabled, setNextDisabled] = React.useState(true);
     //data vars
         //registration form
         const [password, setPassword] = useState('');
@@ -74,25 +82,66 @@ const Registration = (props) => {
         const [croppedImage, setCroppedImage] = useState(null);
         //interests form
         const [clickedInterests, setClickedInterests] = useState([]);
+        //submission
+        const [finished, setFinished] = useState(false);
 
 
     function submitRegistration() {
-
+        const name = lastName? firstName+' '+lastName : firstName;
+        firebase.createUser(email, password).then(function () { //creates user in auth db
+            const uid = firebase.auth.currentUser.uid;
+            const interests = clickedInterests.map(interest => interest.title);
+            firebase.createUserInDB(uid, major, interests).then(async function () { //creates user in regular db
+                let blob = await fetch(croppedImage).then(r => r.blob());
+                firebase.uploadProfilePic(blob).then(function () { //uploads profile picture to storage
+                    firebase.profilePicURL().then(function (url) { //gets the url of the profile picture
+                        firebase.setProfile(name, url).then(function () { //sets the profile in the auth db
+                            console.log("success");
+                            setFinished(true);
+                        })
+                    }).catch(function (error) {
+                        console.error("error getting profileurl:",error);
+                    })
+                }).catch(function (error) {
+                    console.error("error uploading picture:",error);
+                })
+            })
+        })
     }
 
     const handleNext = () => {
         switch (activeStep) {
             case 0: //clicked next on registrationform
                 if (password !== password2) {
-                    props.enqueueSnackbar('Passwörter stimmen nicht überein', 'warning');
+                    props.enqueueSnackbar("Passwords don't match",{
+                        variant: 'warning',
+                    });
                 } else {
                     setActiveStep(activeStep + 1);
                 }
                 break;
             case 1: //-"- profilepicform
+                if(!major) {
+                    props.enqueueSnackbar('You forgot to select your major!',{
+                        variant: 'warning',
+                    })
+                } else if (!croppedImage) {
+                    props.enqueueSnackbar('You have to select a profile picture first',{
+                        variant: 'warning',
+                    })
+                } else {
+                    setActiveStep(activeStep+1);
+                }
                 break;
             case 2: //interestsform
-                submitRegistration();
+                if(clickedInterests.length === 0) {
+                    props.enqueueSnackbar('You have to select some interests first',{
+                        variant: 'warning',
+                    })
+                } else {
+                    setActiveStep(activeStep+1);
+                    submitRegistration();
+                }
                 break;
             default:
                 setActiveStep(activeStep + 1);
@@ -103,8 +152,6 @@ const Registration = (props) => {
     const handleBack = () => {
     setActiveStep(activeStep - 1);
     };
-
-    const [nextDisabled, setNextDisabled] = React.useState(true);
 
     const getStepContent = (step) => {
     switch (step) {
@@ -118,14 +165,16 @@ const Registration = (props) => {
       case 1:
         return <ProfilePicForm  setMajor={setMajor} major={major} setCroppedImage={setCroppedImage} croppedImage={croppedImage}/>;
       case 2:
-        return <InterestsForm setClickedInterests={setClickedInterests}/>;
+        return <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>;
       default:
         throw new Error('Unknown step');
     }
     };
 
     useEffect(() => {
-        setNextDisabled(0===firstName.length||0===email.length);
+        setNextDisabled(
+            0===firstName.length||0===email.length||0===password.length||0===password2.length //registration form
+        );
     });
 
     return (
@@ -144,9 +193,21 @@ const Registration = (props) => {
         <React.Fragment>
           {activeStep === steps.length ? (
             <React.Fragment>
-              <Typography variant="h5" gutterBottom>
-                Thank you for joining Lunchmate.
-              </Typography>
+                {finished ? (
+                    <div className={classes.loading}>
+                        <Typography variant="h5" gutterBottom>
+                            Thank you for joining Lunchmate.
+                        </Typography>
+                        <Button variant="contained" color="primary" href='#' onClick={() => history.push('/main')}>
+                            Go to main page
+                        </Button>
+                    </div>
+                ): (
+                    <div className={classes.loading}>
+                        <CircularProgress/>
+                        <Typography variant='h5' gutterBottom>Finishing up...</Typography>
+                    </div>
+                )}
             </React.Fragment>
           ) : (
             <React.Fragment>
@@ -174,4 +235,4 @@ const Registration = (props) => {
     );
 };
 
-export default withSnackbar(Registration);
+export default withFirebase(withSnackbar(Registration));

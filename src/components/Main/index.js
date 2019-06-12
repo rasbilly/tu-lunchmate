@@ -1,5 +1,5 @@
 import React from 'react';
-import withAuthorization from "../Session/authorization";
+import {withAuthorization} from "../Session";
 import {compose} from "recompose";
 
 const Main = () => (
