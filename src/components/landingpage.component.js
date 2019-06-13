@@ -52,7 +52,7 @@ export default function LandingPage (props) {
                                     </Button>
                             </Grid>
                             <Grid item>
-                                <Button className={classes.signInButton} variant="outlined" color="white" onClick={() => props.history.push('/login')}>
+                                <Button className={classes.signInButton} variant="outlined"  onClick={() => props.history.push('/login')}>
                                     Sign in
                                 </Button>
                             </Grid>

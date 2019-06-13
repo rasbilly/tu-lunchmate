@@ -103,7 +103,7 @@ class Firebase {
         });
     };
     getJoinedLunches = () => this.db.collection(lunches)
-        .where("members","array_contains",this.auth.currentUser.uid)
+        .where("members","array-contains",this.auth.currentUser.uid)
         .get();
     getOwnLunches = () => this.db.collection(lunches)
         .where("owner","==",this.auth.currentUser.uid).get();
@@ -132,20 +132,24 @@ class Firebase {
         });
     };
     getFreeLunches = () => {
-        this.db.collection(lunches).get().then(function (snapshot) {
-            const lunchList = snapshot.docs;
-            const freeLunches = [];
-            lunchList.some(function (lunch) {
-                if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
-                    if (lunch.memberCount<=lunch.maxMembers){
-                        freeLunches.push(lunch);
+        const ctx = this;
+        return new Promise(function (resolve, reject) {
+            ctx.db.collection(lunches).get().then(function (snapshot) {
+                const lunchList = snapshot.docs.map(doc => doc.data());
+                const freeLunches = [];
+                lunchList.some(function (lunch) {
+                    if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
+                        if (lunch.memberCount<=lunch.maxMembers){
+                            freeLunches.push(lunch);
+                        }
                     }
-                }
-            });
-            return freeLunches;
-        }).catch(function (error) {
-            console.error("Failed to get lunches: ",error);
-        })
+                });
+                resolve(freeLunches);
+            }).catch(function (error) {
+                reject(error);
+                console.error("Failed to get lunches: ",error);
+            })
+        });
     };
     sortLunchesByInterests = (lunches) => {
         this.db.collection(users).doc(this.auth.currentUser.uid).get().then(function (doc) {
