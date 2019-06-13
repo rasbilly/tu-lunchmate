@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-//import withAuthorization from "../Session/authorization";
-//import {compose} from "recompose";
-import { withFirebase } from '../Firebase';
+import withAuthorization from '../Session/authorization';
+import { compose } from 'recompose';
 import {
   makeStyles,
   Grid,
@@ -13,16 +12,7 @@ import {
   CardContent,
 } from '@material-ui/core';
 
-// const Main = () => (
-//     <div>
-//         <h1>Main Page</h1>
-//     </div>
-// );
-//
-// const authenticated = authUser => !!authUser;
-// export default compose(
-//     withAuthorization(authenticated),
-// )(Main);
+const authenticated = (authUser) => !!authUser;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -67,7 +57,7 @@ const LunchesGrid = (props) => {
   const [lunches, setlunches] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
       querySnapshot.forEach((doc) => {
@@ -75,7 +65,14 @@ const LunchesGrid = (props) => {
       });
       setlunches(newLunch);
     };
-    fetchData();
+
+    const createTest = () => {
+      firebase.createLunch().then((whatev) => {
+        console.log(whatev);
+      });
+    };
+    createTest();
+    fetchLunchData();
   }, []);
 
   //onclick createLunches
@@ -179,4 +176,4 @@ const LunchesGrid = (props) => {
   );
 };
 
-export default withFirebase(LunchesGrid);
+export default compose(withAuthorization(authenticated))(LunchesGrid);

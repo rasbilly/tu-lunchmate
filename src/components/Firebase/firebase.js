@@ -89,21 +89,22 @@ class Firebase {
     //Main page requests
     createLunch = (title, description, interests, startTimeStamp, endTimeStamp, maxUsers, mensa) => {
         const uid = this.auth.currentUser.uid;
-        return this.db.collection(lunches).doc().set({
-            title: title,
-            description: description,
-            interests: interests,
-            startTimeStamp: firebase.firestore.Timestamp.fromDate(startTimeStamp),
-            endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
-            maxMembers: maxUsers,
-            memberCount: 1,
-            members: [uid],
-            owner: uid,
-            mensa: mensa
-        });
+        console.log(uid)
+        // return this.db.collection(lunches).doc().set({
+        //     title: title,
+        //     description: description,
+        //     interests: interests,
+        //     startTimeStamp: firebase.firestore.Timestamp.fromDate(startTimeStamp),
+        //     endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
+        //     maxMembers: maxUsers,
+        //     memberCount: 1,
+        //     members: [uid],
+        //     owner: uid,
+        //     mensa: mensa
+        // });
     };
     getJoinedLunches = () => this.db.collection(lunches)
-        .where("members","array_contains",this.auth.currentUser.uid)
+        .where("members","array-contains",this.auth.currentUser.uid)
         .get();
     getOwnLunches = () => this.db.collection(lunches)
         .where("owner","==",this.auth.currentUser.uid).get();
