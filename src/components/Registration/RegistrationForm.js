@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect} from 'react';
 import { withFirebase } from '../Firebase';
 import {makeStyles, Grid, TextField, CssBaseline, Container} from "@material-ui/core";
 
@@ -24,31 +24,8 @@ const useStyles = makeStyles(theme => ({
 
 
 const RegistrationForm = (props) => {
-  const { firebase, history } = props;
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [alertMessage, setalertMessage] = useState('');
+  const {setPW, setPW2, setFirstName, setLastName, setEmail} = props;
   const classes = useStyles();
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (password !== password2) {
-      setalertMessage('Passwörter stimmen nicht überein');
-    }
-    firebase.createUser(email, password).then(() => {
-      const user = firebase.auth.currentUser;
-      firebase.createUserInDB(user.uid);
-      user.updateProfile({ displayName: name });
-      history.push('/');
-    });
-  };
-
-  firebase.auth.onAuthStateChanged((user) => {
-    if (user) {
-      history.push('/');
-    }
-  });
 
   return (
       <Container component="main" maxWidth="xs">
@@ -63,6 +40,7 @@ const RegistrationForm = (props) => {
                               required
                               fullWidth
                               id="firstName"
+                              onChange={(e) => {setFirstName(e.target.value)}}
                               label="First Name"
                               autoFocus
                           />
@@ -70,11 +48,11 @@ const RegistrationForm = (props) => {
                       <Grid item xs={12} sm={6}>
                           <TextField
                               variant="outlined"
-                              required
                               fullWidth
                               id="lastName"
                               label="Last Name"
                               name="lastName"
+                              onChange={(e) => setLastName(e.target.value)}
                               autoComplete="lname"
                           />
                       </Grid>
@@ -86,6 +64,7 @@ const RegistrationForm = (props) => {
                               id="email"
                               label="Email Address"
                               name="email"
+                              onChange={(e) => {setEmail(e.target.value)}}
                               autoComplete="email"
                           />
                       </Grid>
@@ -98,6 +77,8 @@ const RegistrationForm = (props) => {
                               label="Password"
                               type="password"
                               id="password"
+                              onChange={(e) => {
+                                  setPW(e.target.value)}}
                               autoComplete="current-password"
                           />
                       </Grid>
@@ -109,14 +90,14 @@ const RegistrationForm = (props) => {
                               name="repeatpassword"
                               label="Repeat password"
                               type="password"
+                              onChange={(e) => {setPW2(e.target.value)}}
                               id="repeat-password"
                           />
                       </Grid>
                   </Grid>
               </form>
       </Container>
-
   );
 };
 
-export default withFirebase(RegistrationForm);
+export default RegistrationForm;

@@ -13,9 +13,8 @@ const useStyles = makeStyles((theme) => ({
 
 const InterestsForm = (props) => {
   const classes = useStyles();
-  const { firebase } = props;
+  const { firebase , setClickedInterests, clickedInterests} = props;
   const [interests, setinterests] = useState([]);
-  const [clickedInterests, setclickedInterests] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +37,7 @@ const InterestsForm = (props) => {
     );
 
     setinterests(newInterests);
-    setclickedInterests([...clickedInterests, newClickedInterest]);
+    setClickedInterests([...clickedInterests, newClickedInterest]);
   };
 
   const handleUnClick = (clickedInterest) => {
@@ -50,7 +49,7 @@ const InterestsForm = (props) => {
     );
 
     setinterests([...interests, newInterest]);
-    setclickedInterests(newClickedInterests);
+    setClickedInterests(newClickedInterests);
   };
 
   const interestsItems = interests.map((interest) => {
