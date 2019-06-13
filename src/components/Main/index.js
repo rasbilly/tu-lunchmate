@@ -10,6 +10,7 @@ import {
   Card,
   CardActions,
   CardContent,
+  Chip,
 } from '@material-ui/core';
 
 const authenticated = (authUser) => !!authUser;
@@ -49,6 +50,10 @@ const useStyles = makeStyles((theme) => ({
   button: {
     width: '100%',
   },
+  chip: {
+    marginRight: theme.spacing(1),
+    marginTop: theme.spacing(1),
+  },
 }));
 
 const LunchesGrid = (props) => {
@@ -65,13 +70,6 @@ const LunchesGrid = (props) => {
       });
       setlunches(newLunch);
     };
-
-    const createTest = () => {
-      firebase.createLunch().then((whatev) => {
-        console.log(whatev);
-      });
-    };
-    createTest();
     fetchLunchData();
   }, []);
 
@@ -102,6 +100,16 @@ const LunchesGrid = (props) => {
       .toLocaleTimeString()
       .slice(0, -3);
 
+    const chips = interests.map((interest, index) => (
+      <Chip
+        key={index}
+        size="small"
+        label={interest}
+        color="primary"
+        className={classes.chip}
+      />
+    ));
+
     return (
       <Grid key={index} item xs={12} sm={6}>
         <Card className={classes.card}>
@@ -119,6 +127,7 @@ const LunchesGrid = (props) => {
             <Typography variant="body2" color="textSecondary" component="p">
               {memberCount}/{maxMembers} are joining this lunch
             </Typography>
+            {chips}
           </CardContent>
           <CardActions>
             <Button
