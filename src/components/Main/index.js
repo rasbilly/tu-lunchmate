@@ -124,7 +124,12 @@ const LunchesGrid = (props) => {
             </Typography>
           </CardContent>
           <CardActions>
-            <Button className={classes.button} size="small" color="primary">
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.button}
+              size="small"
+            >
               Request Join
             </Button>
           </CardActions>
