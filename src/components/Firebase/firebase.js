@@ -106,7 +106,7 @@ class Firebase {
         });
     };
     getJoinedLunches = () => this.db.collection(lunches)
-        .where("members","array_contains",this.auth.currentUser.uid)
+        .where("members","array-contains",this.auth.currentUser.uid)
         .get();
     getOwnLunches = () => this.db.collection(lunches)
         .where("owner","==",this.auth.currentUser.uid).get();

@@ -116,6 +116,10 @@ const Registration = (props) => {
                     props.enqueueSnackbar("Passwords don't match",{
                         variant: 'warning',
                     });
+                } else if (password.length < 6) {
+                    props.enqueueSnackbar("Password should be at least 6 characters long", {
+                        variant: 'warning'
+                    });
                 } else {
                     setActiveStep(activeStep + 1);
                 }
