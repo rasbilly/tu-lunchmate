@@ -9,7 +9,7 @@ import {
   MenuItem,
   Select,
   InputLabel, FormControl,
-  Dialog,DialogTitle, DialogContentText, DialogActions
+  Dialog, DialogTitle, DialogContentText, DialogActions, DialogContent
 } from '@material-ui/core';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import { withFirebase } from '../Firebase';
@@ -200,10 +200,12 @@ const ProfilePicForm = (props) => {
       </Grid>
       <Dialog open={openDialog} onClose={handleCloseDialog} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Crop Image</DialogTitle>
-        <DialogContentText>
-          Crop your profile image here. Make it look good!
-        </DialogContentText>
-        {image && <ReactCrop src={image} onChange={onCropChange} onImageLoaded={onImageLoaded} crop={crop} onComplete={onCropComplete}/>}
+        <DialogContent>
+          <DialogContentText>
+            Crop your profile image here. Make it look good!
+          </DialogContentText>
+          {image && <ReactCrop src={image} onChange={onCropChange} onImageLoaded={onImageLoaded} crop={crop} onComplete={onCropComplete}/>}
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
             Done
