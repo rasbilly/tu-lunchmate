@@ -11,19 +11,35 @@ import {
   CardActions,
   CardContent,
   Chip,
+  Fab,
+  Dialog, DialogActions, DialogTitle, DialogContent,
+  TextField,
+  Select, MenuItem, InputLabel
 } from '@material-ui/core';
+import DateFnsUtils from "@date-io/date-fns";
+import {
+  DateTimePicker, MuiPickersUtilsProvider, TimePicker
+} from "@material-ui/pickers";
+import AddIcon from '@material-ui/icons/Add';
+import InterestsForm from "../Registration/InterestsForm";
+import {withSnackbar} from "notistack";
+
 
 const authenticated = (authUser) => !!authUser;
 
 const useStyles = makeStyles((theme) => ({
+  '@global': {
+    body: {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
   root: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    flexGrow: 1,
+    justifyContent: 'center',
     overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
     padding: 20,
-    height: 900,
   },
   container: {
     display: 'grid',
@@ -49,10 +65,19 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     width: '100%',
+    justifyContent: 'center'
   },
   chip: {
     marginRight: theme.spacing(1),
     marginTop: theme.spacing(1),
+  },
+  fab: {
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed',
   },
 }));
 
@@ -60,6 +85,18 @@ const LunchesGrid = (props) => {
   const classes = useStyles();
   const { firebase } = props;
   const [lunches, setlunches] = useState([]);
+  const [createLunchOpen, setCreateLunchOpen] = useState(false);
+
+  //create lunch attributes
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [maxMembers, setMaxmembers] = useState(2);
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [clickedInterests, setClickedInterests] = useState([]);
+  const [mensa, setMensa] = useState('');
+
+
 
   useEffect(() => {
     const fetchLunchData = async () => {
@@ -95,6 +132,9 @@ const LunchesGrid = (props) => {
       .toDate()
       .toLocaleTimeString()
       .slice(0, -3);
+    const date = startTimeStamp.toDate().toLocaleDateString()
+        .replace('/','.')
+        .replace('/','.'); //too lazy to write a proper replaceAll, sorry
     const endTime = endTimeStamp
       .toDate()
       .toLocaleTimeString()
@@ -122,10 +162,13 @@ const LunchesGrid = (props) => {
             </Typography>
 
             <Typography variant="body2" color="textSecondary" component="p">
-              {startTime} - {endTime}
+              {startTime} - {endTime} on {date}
             </Typography>
             <Typography variant="body2" color="textSecondary" component="p">
-              {memberCount}/{maxMembers} are joining this lunch
+              Mensa: {mensa}
+            </Typography>
+            <Typography variant="body2" color="textSecondary" component="p">
+              {memberCount}/{maxMembers} have joined
             </Typography>
             {chips}
           </CardContent>
@@ -134,9 +177,8 @@ const LunchesGrid = (props) => {
               variant="contained"
               color="primary"
               className={classes.button}
-              size="small"
-            >
-              Request Join
+              size="small">
+              Join
             </Button>
           </CardActions>
         </Card>
@@ -144,45 +186,130 @@ const LunchesGrid = (props) => {
     );
   });
 
+  function onCreateLunch() {
+    const props1 = props;
+    endDate.setDate(startDate.getDate());
+    endDate.setFullYear(startDate.getFullYear());
+    endDate.setMonth(startDate.getMonth());
+    firebase.createLunch(
+        title, desc,
+        clickedInterests.map((interest) => interest.title),
+        startDate, endDate,
+        maxMembers,
+        mensa
+    ).then(function () {
+      props1.enqueueSnackbar("Lunch created!", {
+        variant: 'success'
+      });
+      setCreateLunchOpen(false);
+    }).catch(
+
+    )
+  }
+
+  function handleCloseCreateLunch() {
+    setCreateLunchOpen(false);
+  }
+
+  const handleStartTimeChange = date => setStartDate(date);
+  const handleEndTimeChange = date => setEndDate(date);
+
   return (
-    <>
       <div className={classes.root}>
-        <Grid container spacing={3}>
+        <Grid container spacing={0}>
           <Grid item xs={4}>
-            <Paper classname={classes.paper}>
-              <Paper classname={classes.paper}>
-                <h3 style={{ textAlign: 'center' }}>
-                  You have not created any groups.
-                </h3>
-                <Button
-                  className="btn btn-outline-primary btn-block"
-                  style={{ position: 'center' }}
-                >
-                  Create Group
-                </Button>
-              </Paper>
-              <Paper classname={classes.paper}>
-                <h2 style={{ textAlign: 'center' }}>
-                  2 <small>Requests</small>
-                </h2>
-                <p style={{ textAlign: 'center' }}>are open at this time</p>
-                <Button
-                  className="btn btn-outline-primary btn-block"
-                  style={{ position: 'center' }}
-                >
-                  Show
-                </Button>
-              </Paper>
-            </Paper>
+            <Grid container direction='column' wrap="nowrap" spacing={3}>
+              <Grid item xs={6}>
+                <Paper classname={classes.paper}>
+                  <Typography variant='h6' style={{ textAlign: 'center' }}>
+                    You have not created any Lunches.
+                  </Typography>
+                  <Button variant="contained" color="primary" className={classes.button}
+                          style={{ position: 'center' }}>
+                    Create Lunch
+                  </Button>
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper classname={classes.paper}>
+                  <Typography variant='h6' style={{ textAlign: 'center' }}>You have joined</Typography>
+                  <Typography variant='h5' style={{ textAlign: 'center' }}>
+                    2 <small>Lunches</small>
+                  </Typography>
+                  <Button className={classes.button}
+                      variant="contained" color="primary"
+                      style={{ position: 'center' }}>
+                    Show
+                  </Button>
+                </Paper>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={8}>
-            <h2 component="div">Available Lunches</h2>
-            <Grid container>{lunchItems}</Grid>
+            <Typography component='h1' variant='h2'>Available Lunches</Typography>
+            <Grid container>{lunchItems ? lunchItems : (<Typography variant='h4'>Looks like there aren't any free lunches :(</Typography>) }</Grid>
           </Grid>
         </Grid>
+        <Fab color="secondary" aria-label="Add" className={classes.fab} onClick={()=>setCreateLunchOpen(true)}>
+          <AddIcon />
+        </Fab>
+        <Dialog open={createLunchOpen} onClose={handleCloseCreateLunch} aria-labelledby="form-dialog-title">
+          <DialogTitle id="form-dialog-title">Create Lunch</DialogTitle>
+          <DialogContent>
+            <TextField
+                autoFocus
+                margin="dense"
+                id="title"
+                onChange={(e) => {setTitle(e.target.value)}}
+                value={title}
+                label="Title"
+                type="text"
+                fullWidth
+            />
+            <TextField
+                margin="dense"
+                onChange={(e) => {setDesc(e.target.value)}}
+                value={desc}
+                id="description"
+                label="Description"
+                type="text"
+                fullWidth
+            />
+            <TextField
+                margin="dense"
+                onChange={(e) => {setMensa(e.target.value)}}
+                value={mensa}
+                id="mensa"
+                label="Mensa"
+                type="text"
+                fullWidth
+            />
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <DateTimePicker label="Lunch start time" onChange={handleStartTimeChange} value={startDate} ampm={false} margin="dense"/>
+              <TimePicker label="Lunch end time" onChange={handleEndTimeChange} value={endDate} ampm={false} margin="dense" />
+            </MuiPickersUtilsProvider>
+            <InputLabel htmlFor="maxMembers-select">Max amount of members</InputLabel>
+            <Select
+                value={maxMembers}
+                onChange={(e) => {setMaxmembers(e.target.value)}}
+                inputProps={{
+                  name: 'maxMembers',
+                  id: 'maxMembers-select',
+                }}>
+              <MenuItem value={2}>Two</MenuItem>
+              <MenuItem value={3}>Three</MenuItem>
+              <MenuItem value={4}>Four</MenuItem>
+              <MenuItem value={5}>Five</MenuItem>
+              <MenuItem value={6}>Six</MenuItem>
+            </Select>
+            <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onCreateLunch} color='primary'>Create</Button>
+          </DialogActions>
+        </Dialog>
       </div>
-    </>
   );
 };
 
-export default compose(withAuthorization(authenticated))(LunchesGrid);
+export default compose(withSnackbar, (withAuthorization(authenticated)))(LunchesGrid);
