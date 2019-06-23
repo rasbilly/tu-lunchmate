@@ -16,7 +16,9 @@
     "react-image-crop": "^8.0.2",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.0.1",
-    "recompose": "^0.30.0"
+    "recompose": "^0.30.0",
+    "clsx": "latest",
+    "clsx": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
