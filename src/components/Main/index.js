@@ -36,7 +36,7 @@ const authenticated = (authUser) => !!authUser;
 const useStyles = makeStyles((theme) => ({
   '@global': {
     body: {
-      backgroundColor: theme.palette.common.white,
+      backgroundColor: '#eeeeee',
     },
   },
   root: {
@@ -60,11 +60,6 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     marginBottom: theme.spacing(1),
     margin: `${theme.spacing(1)}px auto`,
-  },
-  card: {
-    maxWidth: 345,
-    marginRight: 10,
-    marginBottom: 20,
   },
   media: {
     height: 0,
@@ -97,20 +92,10 @@ const useStyles = makeStyles((theme) => ({
   expandOpen: {
     transform: 'rotate(180deg)',
   },
-  personal: {
-    padding: 16,
-    backgroundColor: '#DCDCDC',
-    boxShadow: '0px 1px 5px 0px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 3px 1px -2px rgba(0,0,0,0.12)',
-    borderRadius: 4,
-    marginBottom: 30,
-  },
-  available: {
-    padding: 16,
-    color: 'rgba(0, 0, 0, 0.87)',
-  },
   column: {
     color: 'rgba(0, 0, 0, 0.54)',
-    fontWeight: 200,
+    fontSize: 14,
+    fontWeight: 600,
     lineHeight: 2,
   }
 }));
@@ -196,34 +181,34 @@ const LunchesGrid = (props) => {
   const ShowMyLunches = () => {
     if (countMyLunches()) {
       return (
-          <Card>
-            <Typography variant='h5' style={{textAlign: 'center'}}>
-              <small>You have created </small>
-              {count}
-              <small> Lunch(es)</small>
-            </Typography>
-            <CardActions>
-              <IconButton
-                  className={clsx(classes.expand, {
-                    [classes.expandOpen]: ownExpanded,
-                  })}
-                  onClick={handleOwnExpandClick}
-                  aria-expanded={ownExpanded}
-                  aria-label="Show more"
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </CardActions>
-            <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
-              <CardContent>
+           <Card>
+             <Typography variant='h5' style={{textAlign: 'center'}}>
+               <small>You have created</small>
+               {count}
+               <small> Lunch(es)</small>
+             </Typography>
+             <CardActions>
+               <IconButton
+                    className={clsx(classes.expand, {
+                      [classes.expandOpen]: ownExpanded,
+                    })}
+                    onClick={handleOwnExpandClick}
+                    aria-expanded={ownExpanded}
+                    aria-label="Show more"
+               >
+                 <ExpandMoreIcon/>
+               </IconButton>
+             </CardActions>
+             <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
+               <CardContent>
 
-              </CardContent>
-            </Collapse>
-          </Card>
+               </CardContent>
+             </Collapse>
+           </Card>
       );
     } else {
       return (
-          <div className="hello">You have not created any Lunches.</div>
+           <div className="hello">You have not created any Lunches.</div>
       );
     }
   };
@@ -231,34 +216,34 @@ const LunchesGrid = (props) => {
   const ShowJoinedLunches = () => {
     if (countJoinedLunches()) {
       return (
-          <Card>
-            <Typography variant='h5' style={{textAlign: 'center'}}>
-              <small>You have joined </small>
-              {count}
-              <small> Lunch(es)</small>
-            </Typography>
-            <CardActions>
-              <IconButton
-                  className={clsx(classes.expand, {
-                    [classes.expandOpen]: joinedExpanded,
-                  })}
-                  onClick={handleJoinedExpandClick}
-                  aria-expanded={joinedExpanded}
-                  aria-label="Show more"
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </CardActions>
-            <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
-              <CardContent>
+           <Card>
+             <Typography variant='h5' style={{textAlign: 'center'}}>
+               <small>You have joined</small>
+               {count}
+               <small> Lunch(es)</small>
+             </Typography>
+             <CardActions>
+               <IconButton
+                    className={clsx(classes.expand, {
+                      [classes.expandOpen]: joinedExpanded,
+                    })}
+                    onClick={handleJoinedExpandClick}
+                    aria-expanded={joinedExpanded}
+                    aria-label="Show more"
+               >
+                 <ExpandMoreIcon/>
+               </IconButton>
+             </CardActions>
+             <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
+               <CardContent>
 
-              </CardContent>
-            </Collapse>
-          </Card>
+               </CardContent>
+             </Collapse>
+           </Card>
       );
     } else {
       return (
-          <div className="hello">You have not created any Lunches.</div>
+           <div className="hello">You have not created any Lunches.</div>
       );
     }
   };
@@ -277,65 +262,66 @@ const LunchesGrid = (props) => {
     } = lunch;
 
     const startTime = startTimeStamp
-        .toDate()
-        .toLocaleTimeString()
-        .slice(0, -3);
+         .toDate()
+         .toLocaleTimeString()
+         .slice(0, -3);
     const date = startTimeStamp.toDate().toLocaleDateString()
-        .replace('/', '.')
-        .replace('/', '.'); //too lazy to write a proper replaceAll, sorry
+         .replace('/', '.')
+         .replace('/', '.'); //too lazy to write a proper replaceAll, sorry
     const endTime = endTimeStamp
-        .toDate()
-        .toLocaleTimeString()
-        .slice(0, -3);
+         .toDate()
+         .toLocaleTimeString()
+         .slice(0, -3);
 
     const chips = interests.map((interest, index) => (
-        <Chip
-            key={index}
-            size="small"
-            label={interest}
-            color="primary"
-            className={classes.chip}
-        />
+         <Chip
+              key={index}
+              size="small"
+              label={interest}
+              color="primary"
+              className={classes.chip}
+              component={'div'}/>
     ));
 
     return (
-        <Grid key={index} item xs={8} sm={4}>
-          <Card className={classes.card}>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="h2">
-                {title}
-              </Typography>
-              <Typography color="textSecondary" component="p">
-                {description}
-              </Typography>
-              <div>{chips}</div>
-              <br/><Divider component="div"/><br/>
-              <Table>
-                <tr>
-                  <td className={classes.column}>Mensa</td>
-                  <td>{mensa}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Date</td>
-                  <td>{date}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Time</td>
-                  <td>{startTime} - {endTime}</td>
-                </tr>
-              </Table>
-            </CardContent>
-            <CardActions>
-              <Button
-                  variant="contained"
-                  className={classes.button}
-                  size="small"
-                  style={{color: '#DB4444', border: '0.5px solid #DB4444', backgroundColor: 'white'}}>
-                Join {memberCount}/{maxMembers}
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
+         // The grid breakpoints are for responsive Design, DO NOT CHANGE
+         <Grid key={index} item xs={12} sm={6} lg={4} xl={3}>
+           <Card>{/* No style needed, spacing of grid handles everything! */}
+             <CardContent>
+               <Typography gutterBottom variant="h5" component="h2">
+                 {title}
+               </Typography>
+               <Typography color="textSecondary" component="p">
+                 {description}
+               </Typography>
+               <div>{chips}</div>
+               <br/><Divider component="div"/><br/>
+               <Table>
+                 <tr>
+                   <td className={classes.column}>Mensa</td>
+                   <td>{mensa}</td>
+                 </tr>
+                 <tr>
+                   <td className={classes.column}>Date</td>
+                   <td>{date}</td>
+                 </tr>
+                 <tr>
+                   <td className={classes.column}>Time</td>
+                   <td>{startTime} - {endTime}</td>
+                 </tr>
+               </Table>
+               <br/>
+               <Button
+                    variant="outlined"
+                    className={classes.button}
+                    size="small"
+                    style={{color: '#DB4444', borderColor: '#DB4444', marginBottom: '-8px'}}
+                    href="#">
+                 Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
+               </Button>
+             </CardContent>
+           </Card>
+         </Grid>
     );
   });
 
@@ -345,11 +331,11 @@ const LunchesGrid = (props) => {
     endDate.setFullYear(startDate.getFullYear());
     endDate.setMonth(startDate.getMonth());
     firebase.createLunch(
-        title, desc,
-        clickedInterests.map((interest) => interest.title),
-        startDate, endDate,
-        maxMembers,
-        mensa
+         title, desc,
+         clickedInterests.map((interest) => interest.title),
+         startDate, endDate,
+         maxMembers,
+         mensa
     ).then(function () {
       props1.enqueueSnackbar("Lunch created!", {
         variant: 'success'
@@ -359,120 +345,109 @@ const LunchesGrid = (props) => {
     )
   }
 
-function handleCloseCreateLunch() {
-  setCreateLunchOpen(false);
-}
+  function handleCloseCreateLunch() {
+    setCreateLunchOpen(false);
+  }
 
-const handleStartTimeChange = date => setStartDate(date);
-const handleEndTimeChange = date => setEndDate(date);
+  const handleStartTimeChange = date => setStartDate(date);
+  const handleEndTimeChange = date => setEndDate(date);
 
-const menuItems = () => {
-  let its = [];
-  for (let i = 2; i < 7; i++) its.push(<MenuItem value={i}>{i}</MenuItem>);
-  return its;
-};
+  const menuItems = () => {
+    let its = [];
+    for (let i = 2; i < 7; i++) its.push(<MenuItem value={i}>{i}</MenuItem>);
+    return its;
+  };
 
-return (
-    <div className={classes.root}>
-      <Grid container spacing={0}>
-        <Grid item xs={4}>
-          <Grid container direction='column' wrap="nowrap" spacing={3}>
-
-          </Grid>
-        </Grid>
-        <Grid item xs={8}>
-          <Grid container className={classes.personal}>
-            <Grid item xs={8} sm={5} style={{marginRight: 16}}>
-              <Paper classname={classes.paper}>
-                <Typography variant='h5' style={{textAlign: 'center'}}>
-                  <ShowMyLunches/>
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={8} sm={5} style={{float: 'right'}}>
-              <Paper classname={classes.paper}>
-                <Typography variant='h5' style={{textAlign: 'center'}}>
-                  <ShowJoinedLunches/>
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-          <Grid container className={classes.available}>
-            <Typography component='h1' variant='h3' style={{marginBottom: 16}}>Available Lunches</Typography>
-            <Grid container>
-              {lunchItems ? lunchItems : (
-                  <Typography variant='h4'>Looks like there aren't any free lunches :(</Typography>
-              )}
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Fab aria-label="Add" className={classes.fab} onClick={() => setCreateLunchOpen(true)}>
-        <AddIcon/>
-      </Fab>
-      <Dialog open={createLunchOpen} onClose={handleCloseCreateLunch} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Create Lunch</DialogTitle>
-        <DialogContent>
-          <TextField
-              autoFocus
-              margin="dense"
-              id="title"
-              onChange={(e) => {
-                setTitle(e.target.value)
-              }}
-              value={title}
-              label="Title"
-              type="text"
-              fullWidth
-          />
-          <TextField
-              margin="dense"
-              onChange={(e) => {
-                setDesc(e.target.value)
-              }}
-              value={desc}
-              id="description"
-              label="Description"
-              type="text"
-              fullWidth
-          />
-          <TextField
-              margin="dense"
-              onChange={(e) => {
-                setMensa(e.target.value)
-              }}
-              value={mensa}
-              id="mensa"
-              label="Mensa"
-              type="text"
-              fullWidth
-          />
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <DateTimePicker label="Lunch start time" onChange={handleStartTimeChange} value={startDate}
-                            ampm={false} margin="dense"/>
-            <TimePicker label="Lunch end time" onChange={handleEndTimeChange} value={endDate} ampm={false}
-                        margin="dense"/>
-          </MuiPickersUtilsProvider>
-          <InputLabel htmlFor="maxMembers-select">Max amount of members</InputLabel>
-          <Select
-              value={maxMembers}
-              onChange={(e) => {
-                setMaxmembers(e.target.value)
-              }}
-              inputProps={{
-                name: 'maxMembers',
-                id: 'maxMembers-select',
-              }}>
-            {menuItems()}
-          </Select>
-          <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseCreateLunch} color='primary'>Cancel</Button>
-          <Button onClick={onCreateLunch} color='primary'>Create</Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-);
+  return (
+       <div className={classes.root}>
+         <Grid container spacing={3}>
+           <Grid item xs={12} md={4} lg={3}>
+             <Grid container direction='column' wrap="nowrap" spacing={3} style={{background: '#222222'}}/>
+           </Grid>
+           <Grid item xs={12} md={8} lg={9}>
+             <Typography component='h1' variant='h3' style={{marginBottom: 16}}>
+               Your Lunches
+             </Typography>
+             <Grid container spacing={3}>
+               <Grid item xs={12} sm={6}><ShowMyLunches/></Grid>
+               <Grid item xs={12} sm={6}><ShowJoinedLunches/></Grid>
+             </Grid>
+             <Typography component='h1' variant='h3' style={{marginBottom: 16, marginTop: 32}}>Available
+               Lunches
+             </Typography>
+             <Grid container spacing={3}>
+               {lunchItems ? lunchItems :
+                    <Typography variant='h4'>Looks like there aren't any free lunches :(</Typography>
+               }
+             </Grid>
+           </Grid>
+         </Grid>
+         <Fab aria-label="Add" className={classes.fab} onClick={() => setCreateLunchOpen(true)}>
+           <AddIcon/>
+         </Fab>
+         <Dialog open={createLunchOpen} onClose={handleCloseCreateLunch} aria-labelledby="form-dialog-title">
+           <DialogTitle id="form-dialog-title">Create Lunch</DialogTitle>
+           <DialogContent>
+             <TextField
+                  autoFocus
+                  margin="dense"
+                  id="title"
+                  onChange={(e) => {
+                    setTitle(e.target.value)
+                  }}
+                  value={title}
+                  label="Title"
+                  type="text"
+                  fullWidth
+             />
+             <TextField
+                  margin="dense"
+                  onChange={(e) => {
+                    setDesc(e.target.value)
+                  }}
+                  value={desc}
+                  id="description"
+                  label="Description"
+                  type="text"
+                  fullWidth
+             />
+             <TextField
+                  margin="dense"
+                  onChange={(e) => {
+                    setMensa(e.target.value)
+                  }}
+                  value={mensa}
+                  id="mensa"
+                  label="Mensa"
+                  type="text"
+                  fullWidth
+             />
+             <MuiPickersUtilsProvider utils={DateFnsUtils}>
+               <DateTimePicker label="Lunch start time" onChange={handleStartTimeChange} value={startDate}
+                               ampm={false} margin="dense"/>
+               <TimePicker label="Lunch end time" onChange={handleEndTimeChange} value={endDate} ampm={false}
+                           margin="dense"/>
+             </MuiPickersUtilsProvider>
+             <InputLabel htmlFor="maxMembers-select">Max amount of members</InputLabel>
+             <Select
+                  value={maxMembers}
+                  onChange={(e) => {
+                    setMaxmembers(e.target.value)
+                  }}
+                  inputProps={{
+                    name: 'maxMembers',
+                    id: 'maxMembers-select',
+                  }}>
+               {menuItems()}
+             </Select>
+             <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>
+           </DialogContent>
+           <DialogActions>
+             <Button onClick={handleCloseCreateLunch} color='primary'>Cancel</Button>
+             <Button onClick={onCreateLunch} color='primary'>Create</Button>
+           </DialogActions>
+         </Dialog>
+       </div>
+  );
 };
 export default compose(withSnackbar, (withAuthorization(authenticated)))(LunchesGrid);
