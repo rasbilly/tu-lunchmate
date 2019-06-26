@@ -27,6 +27,7 @@ import {
 } from "@material-ui/pickers";
 import AddIcon from '@material-ui/icons/Add';
 import InterestsForm from "../Registration/InterestsForm";
+import OwnLunches from './OwnLunches';
 import {withSnackbar} from "notistack";
 import IconButton from "@material-ui/core/IconButton";
 
@@ -117,7 +118,6 @@ const LunchesGrid = (props) => {
   const [clickedInterests, setClickedInterests] = useState([]);
   const [mensa, setMensa] = useState('');
 
-
   useEffect(() => {
     const fetchLunchData = async () => {
       let newLunch = [];
@@ -133,13 +133,13 @@ const LunchesGrid = (props) => {
   //Zählt meine Lunches durch und gibt sie summiert als Zahl aus
   const [count, setCount] = useState('');
 
-  function countMyLunches() {
+  function countOwnLunches() {
     firebase.auth.onAuthStateChanged(function (user) {
       if (user) {
         const fetchOwnLunches = async () => {
           let z = 0;
           const qs = await firebase.getOwnLunches();
-          qs.forEach(() => {
+          qs.forEach((card) => {
             z += 1;
           });
           setCount(z);
@@ -150,7 +150,46 @@ const LunchesGrid = (props) => {
     return count > 0;
   }
 
-  //counts joined lunches
+  const ShowOwnLunches = () => {
+    if (countOwnLunches()) {
+      return (
+          <Card>
+            <Typography variant='h5' style={{textAlign: 'center'}}>
+              <small>You have created </small>
+              {count}
+              <small> Lunch(es)</small>
+            </Typography>
+            <CardActions>
+              <IconButton
+                  className={clsx(classes.expand, {
+                    [classes.expandOpen]: ownExpanded,
+                  })}
+                  onClick={handleOwnExpandClick}
+                  aria-expanded={ownExpanded}
+                  aria-label="Show more"
+              >
+                <ExpandMoreIcon/>
+              </IconButton>
+            </CardActions>
+            <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
+              <CardContent>
+                <OwnLunches/>
+              </CardContent>
+            </Collapse>
+          </Card>
+      );
+    } else {
+      return (
+          <div className="hello">You have not created any Lunches.</div>
+      );
+    }
+  };
+
+  function handleOwnExpandClick() {
+    setOwnExpanded(!ownExpanded);
+  }
+
+  //do same with joined lunches
   const [num, setNum] = useState('');
 
   function countJoinedLunches() {
@@ -167,86 +206,49 @@ const LunchesGrid = (props) => {
         fetchJoinedLunches();
       }
     });
-    return num > 0;
+    return num > 0
   }
 
-  function handleOwnExpandClick() {
-    setOwnExpanded(!ownExpanded);
-  }
+  const ShowJoinedLunches = () => {
+    if (countJoinedLunches()) {
+      return (
+          <Card>
+            <Typography variant='h5' style={{textAlign: 'center'}}>
+              <small>You have joined </small>
+              {count}
+              <small> Lunch(es)</small>
+            </Typography>
+            <CardActions>
+              <IconButton
+                  className={clsx(classes.expand, {
+                    [classes.expandOpen]: joinedExpanded,
+                  })}
+                  onClick={handleJoinedExpandClick}
+                  aria-expanded={joinedExpanded}
+                  aria-label="Show more"
+              >
+                <ExpandMoreIcon/>
+              </IconButton>
+            </CardActions>
+            <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
+              <CardContent>
+
+              </CardContent>
+            </Collapse>
+          </Card>
+      );
+    } else {
+      return (
+          <div className="hello">You have not created any Lunches.</div>
+      );
+    }
+  };
 
   function handleJoinedExpandClick() {
     setJoinedExpanded(!joinedExpanded);
   }
 
-  const ShowMyLunches = () => {
-    if (countMyLunches()) {
-      return (
-           <Card>
-             <Typography variant='h5' style={{textAlign: 'center'}}>
-               <small>You have created</small>
-               {count}
-               <small> Lunch(es)</small>
-             </Typography>
-             <CardActions>
-               <IconButton
-                    className={clsx(classes.expand, {
-                      [classes.expandOpen]: ownExpanded,
-                    })}
-                    onClick={handleOwnExpandClick}
-                    aria-expanded={ownExpanded}
-                    aria-label="Show more"
-               >
-                 <ExpandMoreIcon/>
-               </IconButton>
-             </CardActions>
-             <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
-               <CardContent>
 
-               </CardContent>
-             </Collapse>
-           </Card>
-      );
-    } else {
-      return (
-           <div className="hello">You have not created any Lunches.</div>
-      );
-    }
-  };
-
-  const ShowJoinedLunches = () => {
-    if (countJoinedLunches()) {
-      return (
-           <Card>
-             <Typography variant='h5' style={{textAlign: 'center'}}>
-               <small>You have joined</small>
-               {count}
-               <small> Lunch(es)</small>
-             </Typography>
-             <CardActions>
-               <IconButton
-                    className={clsx(classes.expand, {
-                      [classes.expandOpen]: joinedExpanded,
-                    })}
-                    onClick={handleJoinedExpandClick}
-                    aria-expanded={joinedExpanded}
-                    aria-label="Show more"
-               >
-                 <ExpandMoreIcon/>
-               </IconButton>
-             </CardActions>
-             <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
-               <CardContent>
-
-               </CardContent>
-             </Collapse>
-           </Card>
-      );
-    } else {
-      return (
-           <div className="hello">You have not created any Lunches.</div>
-      );
-    }
-  };
 
 
   const lunchItems = lunches.map((lunch, index) => {
@@ -297,18 +299,20 @@ const LunchesGrid = (props) => {
                <div>{chips}</div>
                <br/><Divider component="div"/><br/>
                <Table>
-                 <tr>
-                   <td className={classes.column}>Mensa</td>
-                   <td>{mensa}</td>
-                 </tr>
-                 <tr>
-                   <td className={classes.column}>Date</td>
-                   <td>{date}</td>
-                 </tr>
-                 <tr>
-                   <td className={classes.column}>Time</td>
-                   <td>{startTime} - {endTime}</td>
-                 </tr>
+                 <tbody>
+                   <tr>
+                     <td className={classes.column}>Mensa</td>
+                     <td>{mensa}</td>
+                   </tr>
+                   <tr>
+                     <td className={classes.column}>Date</td>
+                     <td>{date}</td>
+                   </tr>
+                   <tr>
+                     <td className={classes.column}>Time</td>
+                     <td>{startTime} - {endTime}</td>
+                   </tr>
+                 </tbody>
                </Table>
                <br/>
                <Button
@@ -324,6 +328,8 @@ const LunchesGrid = (props) => {
          </Grid>
     );
   });
+
+
 
   function onCreateLunch() {
     const props1 = props;
@@ -369,7 +375,7 @@ const LunchesGrid = (props) => {
                Your Lunches
              </Typography>
              <Grid container spacing={3}>
-               <Grid item xs={12} sm={6}><ShowMyLunches/></Grid>
+               <Grid item xs={12} sm={6}><ShowOwnLunches/></Grid>
                <Grid item xs={12} sm={6}><ShowJoinedLunches/></Grid>
              </Grid>
              <Typography component='h1' variant='h3' style={{marginBottom: 16, marginTop: 32}}>Available
