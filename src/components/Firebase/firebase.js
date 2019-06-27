@@ -168,7 +168,7 @@ class Firebase {
     sortLunchesByInterests = (lunches) => {
         const ctx = this;
         return new Promise(function (resolve, reject) {
-            this.db.collection(users).doc(this.auth.currentUser.uid).get().then(function (doc) {
+            ctx.db.collection(users).doc(ctx.auth.currentUser.uid).get().then(function (doc) {
                 const interests = doc.data().interests;
                 resolve(rankAndSort(interests, lunches));
             }).catch(function (error) {

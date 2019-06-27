@@ -130,7 +130,8 @@ const LunchesGrid = (props) => {
     const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
-      querySnapshot.forEach((doc) => {
+      const sortedSnapshot = await firebase.sortLunchesByInterests(querySnapshot);
+      sortedSnapshot.forEach((doc) => {
         console.log(doc);
         if(!doc.members.includes(firebase.auth.currentUser.uid)
             && !(doc.owner==firebase.auth.currentUser.uid)){
@@ -163,7 +164,7 @@ const LunchesGrid = (props) => {
     return count > 0;
   }
   let showLunches = (
-    <div className="hello">You have not created any Lunches.</div>
+    <div className="hello">You haven't created any Lunches. See that red plus in the corner?</div>
   );
   if (countOwnLunches()) {
     showLunches = (
@@ -253,7 +254,7 @@ const LunchesGrid = (props) => {
         </Card>
       );
     } else {
-      return <div className="hello">You have not joined any Lunches.</div>;
+      return <div className="hello">You haven't joined any Lunches.</div>;
     }
   };
 
