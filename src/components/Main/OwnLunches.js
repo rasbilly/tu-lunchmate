@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { withFirebase } from '../Firebase';
 import {
   makeStyles,
@@ -14,6 +14,7 @@ import {
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import UpdateLunchForm from './UpdateLunchForm';
 
 const useStyles = makeStyles((theme) => ({
   chip: {
@@ -43,7 +44,9 @@ const OwnLunches = (props) => {
   const classes = useStyles();
   const { firebase, setUpdateLunches, updateLunches } = props;
   const [ownLunches, setOwnLunches] = useState([]);
-  const [updateLunch, setUpdateLunch] = useState(false);
+  const [hasUpdated, setHasUpdated] = useState(false);
+  const [activeModal, setActiveModal] = useState(false);
+  const [updateLunchData, setUpdateLunchData] = useState();
 
   useEffect(() => {
     const fetchOwnLunchData = async () => {
@@ -55,13 +58,18 @@ const OwnLunches = (props) => {
       setOwnLunches(newOwnLunches);
     };
     fetchOwnLunchData();
-  }, [updateLunch]);
+  }, [hasUpdated]);
 
   const deleteLunch = (id) => {
     firebase.deleteLunch(id).then(() => {
-      setUpdateLunch(!updateLunch);
+      setHasUpdated(!hasUpdated);
       setUpdateLunches(!updateLunches);
     });
+  };
+
+  const updateLunch = (lunch) => {
+    setUpdateLunchData(lunch);
+    setActiveModal(true);
   };
 
   const ownLunchItems = ownLunches.map((lunch, index) => {
@@ -135,7 +143,11 @@ const OwnLunches = (props) => {
             </Table>
           </CardContent>
           <CardActions>
-            <Button className={classes.editButton} variant="contained">
+            <Button
+              className={classes.editButton}
+              variant="contained"
+              onClick={() => updateLunch(lunch)}
+            >
               Edit
               <EditIcon className={classes.rightIcon} />
             </Button>
@@ -149,6 +161,16 @@ const OwnLunches = (props) => {
             </Button>
           </CardActions>
         </Card>
+        <UpdateLunchForm
+          dialogTitle="Edit Lunch"
+          active={activeModal}
+          setActive={setActiveModal}
+          lunch={updateLunchData}
+          hasUpdates={hasUpdated}
+          updateLunches={updateLunches}
+          setHasUpdated={setHasUpdated}
+          setUpdateLunches={setUpdateLunches}
+        />
       </Grid>
     );
   });

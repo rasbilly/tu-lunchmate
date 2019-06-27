@@ -105,6 +105,21 @@ class Firebase {
             mensa: mensa
         });
     };
+    updateLunch = (title, description, interests, startTimeStamp, endTimeStamp, maxUsers, mensa, lunchID) => {
+        const uid = this.auth.currentUser.uid;
+        return this.db.collection(lunches).doc(lunchID).update({
+            title: title,
+            description: description,
+            interests: interests,
+            startTimeStamp: firebase.firestore.Timestamp.fromDate(startTimeStamp),
+            endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
+            maxMembers: maxUsers,
+            memberCount: 1,
+            members: [uid],
+            owner: uid,
+            mensa: mensa
+        });
+    };
     getJoinedLunches = () => this.db.collection(lunches)
         .where("members","array-contains",this.auth.currentUser.uid)
         .get();

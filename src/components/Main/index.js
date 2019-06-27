@@ -163,7 +163,9 @@ const LunchesGrid = (props) => {
       return (
         <Card>
           <Typography variant="h5" style={{ textAlign: 'center' }}>
-            <small>You have created {count} Lunch(es)</small>
+            <small>You have created </small>
+            {count}
+            <small> Lunch(es)</small>
           </Typography>
           <CardActions>
             <IconButton

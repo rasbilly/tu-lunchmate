@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { withFirebase } from '../Firebase';
 import { Typography, Chip, makeStyles, Grid } from '@material-ui/core';
 
@@ -13,8 +13,13 @@ const useStyles = makeStyles((theme) => ({
 
 const InterestsForm = (props) => {
   const classes = useStyles();
-  const { firebase , setClickedInterests, clickedInterests} = props;
-  const [interests, setinterests] = useState([]);
+  const {
+    firebase,
+    setClickedInterests,
+    updatedInterests,
+    clickedInterests,
+  } = props;
+  const [interests, setInterests] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,20 +28,32 @@ const InterestsForm = (props) => {
       querySnapshot.forEach((doc) => {
         newInterests.push({ id: doc.id, title: doc.data().title });
       });
-      setinterests(newInterests);
+      if (updatedInterests) setUpdateData(newInterests, updatedInterests);
+      else setInterests(newInterests);
     };
     fetchData();
   }, []);
 
+  const setUpdateData = (unClInterests, clInterests) => {
+    const newClickedInterests = unClInterests.filter((element) =>
+      clInterests.includes(element.title),
+    );
+    const newInterests = unClInterests.filter(
+      (element) => !clInterests.includes(element.title),
+    );
+    setClickedInterests(newClickedInterests);
+    setInterests(newInterests);
+  };
+
   const handleClick = (clickedInterest) => {
     const newClickedInterest = interests.find(
-      (item) => item.id === clickedInterest.id,
+      (item) => item.title === clickedInterest.title,
     );
     const newInterests = interests.filter(
-      (item) => item.id !== clickedInterest.id,
+      (item) => item.title !== clickedInterest.title,
     );
 
-    setinterests(newInterests);
+    setInterests(newInterests);
     setClickedInterests([...clickedInterests, newClickedInterest]);
   };
 
@@ -48,13 +65,14 @@ const InterestsForm = (props) => {
       (item) => item.id !== clickedInterest.id,
     );
 
-    setinterests([...interests, newInterest]);
+    setInterests([...interests, newInterest]);
     setClickedInterests(newClickedInterests);
   };
 
-  const interestsItems = interests.map((interest) => {
+  const interestsItems = interests.map((interest, index) => {
     return (
       <Chip
+        key={index}
         className={classes.chip}
         label={interest.title}
         key={interest.id}
@@ -64,9 +82,10 @@ const InterestsForm = (props) => {
     );
   });
 
-  const clickedInterestsItems = clickedInterests.map((interest) => {
+  const clickedInterestsItems = clickedInterests.map((interest, index) => {
     return (
       <Chip
+        key={index}
         className={classes.chip}
         label={interest.title}
         key={interest.id}
