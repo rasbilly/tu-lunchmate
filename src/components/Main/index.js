@@ -123,6 +123,7 @@ const LunchesGrid = (props) => {
   const [desc, setDesc] = useState('');
   const [clickedInterests, setClickedInterests] = useState([]);
   const [mensa, setMensa] = useState('');
+  const [updateLunches, setUpdateLunches] = useState(false);
 
   useEffect(() => {
     const fetchLunchData = async () => {
@@ -132,9 +133,10 @@ const LunchesGrid = (props) => {
         newLunch.push(doc);
       });
       setlunches(newLunch);
+      countOwnLunches();
     };
     fetchLunchData();
-  }, []);
+  }, [updateLunches]);
 
   //Zählt meine Lunches durch und gibt sie summiert als Zahl aus
   const [count, setCount] = useState('');
@@ -177,7 +179,10 @@ const LunchesGrid = (props) => {
           </CardActions>
           <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
             <CardContent>
-              <OwnLunches />
+              <OwnLunches
+                updateLunches={updateLunches}
+                setUpdateLunches={setUpdateLunches}
+              />
             </CardContent>
           </Collapse>
         </Card>
@@ -357,6 +362,7 @@ const LunchesGrid = (props) => {
           variant: 'success',
         });
         setCreateLunchOpen(false);
+        setUpdateLunches(!updateLunches);
       })
       .catch();
   }

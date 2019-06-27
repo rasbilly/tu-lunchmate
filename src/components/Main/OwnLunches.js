@@ -35,29 +35,36 @@ const useStyles = makeStyles((theme) => ({
   },
   editButton: {
     backgroundColor: '#f0ad4e',
-    color: '#ffffff'
+    color: '#ffffff',
   },
 }));
 
 const OwnLunches = (props) => {
   const classes = useStyles();
-  const { firebase } = props;
+  const { firebase, setUpdateLunches, updateLunches } = props;
   const [ownLunches, setOwnLunches] = useState([]);
+  const [updateLunch, setUpdateLunch] = useState(false);
 
   useEffect(() => {
     const fetchOwnLunchData = async () => {
       let newOwnLunches = [];
       const querySnapshot = await firebase.getOwnLunches();
       querySnapshot.forEach((doc) => {
-        newOwnLunches.push(doc.data());
+        newOwnLunches.push({ id: doc.id, data: doc.data() });
       });
       setOwnLunches(newOwnLunches);
     };
     fetchOwnLunchData();
-  }, []);
+  }, [updateLunch]);
+
+  const deleteLunch = (id) => {
+    firebase.deleteLunch(id).then(() => {
+      setUpdateLunch(!updateLunch);
+      setUpdateLunches(!updateLunches);
+    });
+  };
 
   const ownLunchItems = ownLunches.map((lunch, index) => {
-    console.log(lunch);
     const {
       description,
       title,
@@ -65,9 +72,7 @@ const OwnLunches = (props) => {
       interests,
       endTimeStamp,
       startTimeStamp,
-      memberCount,
-      maxMembers,
-    } = lunch;
+    } = lunch.data;
 
     const startTime = startTimeStamp
       .toDate()
@@ -134,7 +139,11 @@ const OwnLunches = (props) => {
               Edit
               <EditIcon className={classes.rightIcon} />
             </Button>
-            <Button color="primary" variant="contained">
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => deleteLunch(lunch.id)}
+            >
               Delete
               <DeleteIcon className={classes.rightIcon} />
             </Button>
@@ -146,7 +155,7 @@ const OwnLunches = (props) => {
 
   return (
     <Grid container spacing={3}>
-      {ownLunchItems};
+      {ownLunchItems}
     </Grid>
   );
 };
