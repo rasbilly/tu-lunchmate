@@ -67,7 +67,8 @@ class Firebase {
     createUserInDB = (uid, major, interests, name) => this.db.collection(users).doc(uid).set({
         major: major,
         interests: interests,
-        name : name
+        name : name,
+        description: "You don't have a description yet. Click here to change that"
     });
     setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
         displayName: name,

@@ -82,7 +82,8 @@ const Registration = (props) => {
         const [croppedImage, setCroppedImage] = useState(null);
         //interests form
         const [clickedInterests, setClickedInterests] = useState([]);
-        //submission
+        const [interests, setinterests] = useState([]);
+    //submission
         const [finished, setFinished] = useState(false);
 
 
@@ -90,8 +91,7 @@ const Registration = (props) => {
         const name = lastName? firstName+' '+lastName : firstName;
         firebase.createUser(email, password).then(function () { //creates user in auth db
             const uid = firebase.auth.currentUser.uid;
-            const interests = clickedInterests.map(interest => interest.title);
-            firebase.createUserInDB(uid, major, interests, name).then(async function () { //creates user in regular db
+            firebase.createUserInDB(uid, major, clickedInterests, name).then(async function () { //creates user in regular db
                 let blob = await fetch(croppedImage).then(r => r.blob());
                 firebase.uploadProfilePic(blob).then(function () { //uploads profile picture to storage
                     firebase.profilePicURL().then(function (url) { //gets the url of the profile picture
@@ -169,7 +169,7 @@ const Registration = (props) => {
       case 1:
         return <ProfilePicForm  setMajor={setMajor} major={major} setCroppedImage={setCroppedImage} croppedImage={croppedImage}/>;
       case 2:
-        return <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>;
+        return <InterestsForm setClickedInterests={setClickedInterests} interests={interests} setinterests={setinterests} clickedInterests={clickedInterests}/>;
       default:
         throw new Error('Unknown step');
     }
