@@ -33,7 +33,6 @@ class Firebase {
         this.auth.signInWithEmailAndPassword(email, password);
       signOut = () => this.auth.signOut();
       resetPassword = email => this.auth.sendPasswordResetEmail(email);
-      updatePassword = password => this.auth.currentUser.updatePassword(password);
       //get user from db and combine with object to store in cache
       onAuthUserListener = (next, fallback) =>
           this.auth.onAuthStateChanged(authUser => {
@@ -162,11 +161,12 @@ class Firebase {
     };
     //profile page requests
     setUserDesc = (description) => this.db.collection(users).doc(this.auth.currentUser.uid).set({description: description});
+    updateUserInterests = (interests) => this.db.collection(users).doc(this.auth.currentUser.uid).update({interests: interests});
     //updating profile pic, etc. all the same as registration... so see above
-    setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
-        .set({
+    updateUserBio =  (major, description) => this.db.collection(users).doc(this.auth.currentUser.uid)
+        .update({
             major: major,
-            interests: interests
+            description: description
         });
     //Get user
     user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user

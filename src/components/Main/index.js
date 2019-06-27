@@ -11,11 +11,13 @@ import {
   CardActions,
   CardContent,
   Chip,
+  SwipeableDrawer,
   Fab,
 } from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
 import CreateLunch from '../CreateLunch/CreateLunch';
+import Profile from "../Profile/Profile";
 
 const authenticated = (authUser) => !!authUser;
 
@@ -71,12 +73,16 @@ const useStyles = makeStyles((theme) => ({
     left: 'auto',
     position: 'fixed',
   },
+  drawer: {
+    background: "#313131"
+  }
 }));
 
 const LunchesGrid = (props) => {
   const classes = useStyles();
   const { firebase } = props;
   const [lunches, setlunches] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [createdLunch, setCreatedLunch] = useState(false);
 
   useEffect(() => {
@@ -112,7 +118,13 @@ const LunchesGrid = (props) => {
   }
 
   //onclick openProfile
-
+  const toggleDrawer = (open) => event => {
+    if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    //TODO: save profile on close
+    setDrawerOpen(open);
+  };
   //onclick joinLunch
 
   const ShowMyLunches = () => {
@@ -214,6 +226,7 @@ const LunchesGrid = (props) => {
 
   return (
     <div className={classes.root}>
+      <Button onClick={toggleDrawer(true)}>Open Profile</Button>
       <Grid container spacing={0}>
         <Grid item xs={4}>
           <Grid container direction="column" wrap="nowrap" spacing={3}>
@@ -281,6 +294,14 @@ const LunchesGrid = (props) => {
         active={createLunchOpen}
         setCreatedLunch={setCreatedLunch}
       />
+
+      <SwipeableDrawer
+          open={drawerOpen}
+          classes={{ paper: classes.drawer }}
+          onClose={toggleDrawer(false)}
+          onOpen={toggleDrawer(true)}>
+        <Profile/>
+      </SwipeableDrawer>
     </div>
   );
 };

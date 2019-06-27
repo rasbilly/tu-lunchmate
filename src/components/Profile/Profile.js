@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {compose} from "recompose";
 import withAuthorization from "../Session/authorization";
-import {Avatar, TextField, Grid, Button, Typography} from "@material-ui/core";
+import {Container, Avatar, TextField, Grid, Button, Typography, CssBaseline, DialogContent, DialogTitle, DialogActions, Dialog, DialogContentText} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import InterestsForm from "../Registration/InterestsForm";
+import {withSnackbar} from "notistack";
 
 const useStyles = makeStyles(theme => ({
     '@global': {
@@ -14,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        width: 200,
+        width: 400,
         color: 'white'
     },
     text: {
@@ -52,11 +53,22 @@ const Profile = (props) => {
 
     useEffect(() => {
         if (interests!==[] && userInfo!==[]) {
-            console.log(clickedInterests);
             setinterests(interests.filter(x => !clickedInterests.includes(x)));
             setUserInfo({...userInfo, interests: clickedInterests})
         }
+        if (clickedInterests && clickedInterests.length > 0) {
+            firebase.updateUserInterests(clickedInterests);
+        }
     }, [clickedInterests]);
+
+    useEffect(()=>{
+        console.log(userInfo);
+        if (userInfo != null) {
+            if (userInfo.major&&userInfo.description) {
+                firebase.updateUserBio(userInfo.major, userInfo.description);
+            }
+        }
+    }, [userInfo]);
 
     const fetchUserData = (uid) => {
         firebase.user(uid).then(function (snapshot) {
@@ -66,66 +78,125 @@ const Profile = (props) => {
         })
     };
 
-    function resetPw() {
-        if (userObj)  {
-            firebase.resetPassword(userObj.email);
-        }
-    }
-
     function handleDescChange(text) {
         setUserInfo({...userInfo, description: text});
         console.log(userInfo);
     }
 
+    //dialog
+    const [open, setOpen] = React.useState(false);
+
+    function handleClickOpen() {
+        setOpen(true);
+    }
+
+    function handleClose() {
+        setOpen(false);
+    }
+
+    function handleCloseAndSend() {
+        setOpen(false);
+        if (userObj)  {
+            firebase.resetPassword(userObj.email).then(function () {
+                props.enqueueSnackbar("We sent you an email with instructions :)",{
+                    variant: 'info',
+                });
+            });
+        }
+    }
+
+    function resetPw() {
+        handleClickOpen();
+    }
+
     return (
         <div>
-            <Avatar align='center' className={classes.bigAvatar} src={userObj && userObj.photoURL}/>
-            <Typography className={classes.text} variant='h3' align='center'>{userObj && userObj.displayName}</Typography>
-            <Grid container spacing={3}>
-                <Grid item xs={12}>
-                    <TextField
-                        id="standard-multiline-flexible"
-                        multiline
-                        rowsMax="3"
-                        value={userInfo && userInfo.description}
-                        onChange={(e) => handleDescChange(e.target.value)}
-                        className={classes.textField}
-                        InputProps={{
-                            classes: {
-                                input: classes.textField
-                            }
-                        }}
-                        inputProps={{
-                            maxLength: 70
-                        }}
-                        margin="normal"
-                    />
+            <Container component="main" maxWidth="sm">
+                <CssBaseline />
+                <Grid justify="center" direction="column" alignItems="center" container spacing={2}>
+                    <Grid item xs={12}>
+                        <Avatar align='center' className={classes.bigAvatar} src={userObj && userObj.photoURL}/>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography className={classes.text} variant='h3' align='center'>{userObj && userObj.displayName}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            fullWidth={true}
+                            id="standard-multiline-flexible"
+                            multiline
+                            rowsMax="3"
+                            value={userInfo && userInfo.description}
+                            onChange={(e) => handleDescChange(e.target.value)}
+                            className={classes.textField}
+                            InputProps={{
+                                classes: {
+                                    input: classes.textField
+                                }
+                            }}
+                            inputStyle={{ textAlign: 'center' }}
+                            inputProps={{
+                                maxLength: 70,
+                                textAlign: "center"
+                            }}
+                            margin="normal"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Grid container spacing={1}>
+                            <Grid item xs={6}>
+                                <Typography className={classes.text}>Email: </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography className={classes.text}>{userObj && userObj.email}</Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography className={classes.text}>Major: </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography className={classes.text}>{userInfo && userInfo.major}</Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                    <Typography className={classes.text}>Email: </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography className={classes.text}>{userObj && userObj.email}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography className={classes.text}>Major: </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography className={classes.text}>{userInfo && userInfo.major}</Typography>
-                </Grid>
-            </Grid>
-            <InterestsForm
+            <Grid item xs={12}>
+                <InterestsForm
                 setClickedInterests={setClickedInterests}
                 clickedInterests={clickedInterests}
                 interests={interests}
-                setinterests={setinterests}
-            />
-            <Button className={classes.btn} variant="outlined" onClick={resetPw}>Reset Password</Button>
+                setinterests={setinterests}/>
+            </Grid>
+            <Grid item xs={12}>
+                <Button  className={classes.btn} variant="outlined" onClick={resetPw}>Reset Password</Button>
+            </Grid>
+        </Container>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Reset password"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        You sure buddy?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Nah
+                    </Button>
+                    <Button onClick={handleCloseAndSend} color="primary" autoFocus>
+                        Yup
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
 
 const authenticated = authUser => !!authUser;
 export default compose(
+    withSnackbar,
     withAuthorization(authenticated),
 )(Profile);
