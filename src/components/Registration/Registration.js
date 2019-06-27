@@ -91,7 +91,7 @@ const Registration = (props) => {
         firebase.createUser(email, password).then(function () { //creates user in auth db
             const uid = firebase.auth.currentUser.uid;
             const interests = clickedInterests.map(interest => interest.title);
-            firebase.createUserInDB(uid, major, interests).then(async function () { //creates user in regular db
+            firebase.createUserInDB(uid, major, interests, name).then(async function () { //creates user in regular db
                 let blob = await fetch(croppedImage).then(r => r.blob());
                 firebase.uploadProfilePic(blob).then(function () { //uploads profile picture to storage
                     firebase.profilePicURL().then(function (url) { //gets the url of the profile picture

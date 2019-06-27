@@ -57,9 +57,6 @@ class Firebase {
               fallback();
             }
           });
-
-    //Get user
-    user = uid => this.db.collection(users).doc(uid).get();
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
@@ -67,15 +64,11 @@ class Firebase {
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
-    createUserInDB = (uid, major, interests) => this.db.collection(users).doc(uid).set({
+    createUserInDB = (uid, major, interests, name) => this.db.collection(users).doc(uid).set({
         major: major,
-        interests: interests
+        interests: interests,
+        name : name
     });
-    setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
-        .set({
-            major: major,
-            interests: interests
-        });
     setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
         displayName: name,
         photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
@@ -142,7 +135,7 @@ class Firebase {
                 const freeLunches = [];
                 lunchList.some(function (lunch) {
                     if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
-                        if (lunch.memberCount<=lunch.maxMembers){
+                        if (lunch.memberCount < lunch.maxMembers){
                             freeLunches.push(lunch);
                         }
                     }
@@ -166,6 +159,19 @@ class Firebase {
             })
         });
     };
+    //profile page requests
+    setUserDesc = (description) => this.db.collection(users).doc(this.auth.currentUser.uid).set({description: description});
+    //updating profile pic, etc. all the same as registration... so see above
+    setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
+        .set({
+            major: major,
+            interests: interests
+        });
+    //Get user
+    user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user
+    //Get user profile picture url
+    userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
+    sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
@@ -199,5 +205,4 @@ function filterByUserCount(min, max, lunches) {
     });
     return newList;
 }
-
 export default Firebase;
