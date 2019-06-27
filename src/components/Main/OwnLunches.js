@@ -55,6 +55,8 @@ const OwnLunches = (props) => {
       querySnapshot.forEach((doc) => {
         newOwnLunches.push({ id: doc.id, data: doc.data() });
       });
+      console.log('ownlunch');
+
       setOwnLunches(newOwnLunches);
     };
     fetchOwnLunchData();
@@ -166,7 +168,7 @@ const OwnLunches = (props) => {
           active={activeModal}
           setActive={setActiveModal}
           lunch={updateLunchData}
-          hasUpdates={hasUpdated}
+          hasUpdated={hasUpdated}
           updateLunches={updateLunches}
           setHasUpdated={setHasUpdated}
           setUpdateLunches={setUpdateLunches}

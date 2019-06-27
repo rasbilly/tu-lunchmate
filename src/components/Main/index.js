@@ -157,42 +157,40 @@ const LunchesGrid = (props) => {
     });
     return count > 0;
   }
-
-  const ShowOwnLunches = () => {
-    if (countOwnLunches()) {
-      return (
-        <Card>
-          <Typography variant="h5" style={{ textAlign: 'center' }}>
-            <small>You have created </small>
-            {count}
-            <small> Lunch(es)</small>
-          </Typography>
-          <CardActions>
-            <IconButton
-              className={clsx(classes.expand, {
-                [classes.expandOpen]: ownExpanded,
-              })}
-              onClick={handleOwnExpandClick}
-              aria-expanded={ownExpanded}
-              aria-label="Show more"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-          </CardActions>
-          <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
-            <CardContent>
-              <OwnLunches
-                updateLunches={updateLunches}
-                setUpdateLunches={setUpdateLunches}
-              />
-            </CardContent>
-          </Collapse>
-        </Card>
-      );
-    } else {
-      return <div className="hello">You have not created any Lunches.</div>;
-    }
-  };
+  let showLunches = (
+    <div className="hello">You have not created any Lunches.</div>
+  );
+  if (countOwnLunches()) {
+    showLunches = (
+      <Card>
+        <Typography variant="h5" style={{ textAlign: 'center' }}>
+          <small>You have created </small>
+          {count}
+          <small> Lunch(es)</small>
+        </Typography>
+        <CardActions>
+          <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: ownExpanded,
+            })}
+            onClick={handleOwnExpandClick}
+            aria-expanded={ownExpanded}
+            aria-label="Show more"
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+        </CardActions>
+        <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <OwnLunches
+              updateLunches={updateLunches}
+              setUpdateLunches={setUpdateLunches}
+            />
+          </CardContent>
+        </Collapse>
+      </Card>
+    );
+  }
 
   function handleOwnExpandClick() {
     setOwnExpanded(!ownExpanded);
@@ -391,7 +389,7 @@ const LunchesGrid = (props) => {
           </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <ShowOwnLunches />
+              {showLunches}
             </Grid>
             <Grid item xs={12} sm={6}>
               <ShowJoinedLunches />

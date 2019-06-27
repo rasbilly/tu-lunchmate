@@ -27,7 +27,6 @@ const UpdateLunchForm = (props) => {
   const {
     firebase,
     dialogTitle,
-    method,
     active,
     setActive,
     lunch,
@@ -94,6 +93,7 @@ const UpdateLunchForm = (props) => {
           variant: 'success',
         });
         setActive(false);
+        console.log(clickedInterests);
         setHasUpdated(!hasUpdated);
         setUpdateLunches(!updateLunches);
       });
