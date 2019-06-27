@@ -7,10 +7,13 @@ import {
   Button,
   Card,
   CardContent,
+  CardActions,
   Chip,
   Divider,
   Table,
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
   chip: {
@@ -26,6 +29,13 @@ const useStyles = makeStyles((theme) => ({
   button: {
     width: '100%',
     justifyContent: 'center',
+  },
+  rightIcon: {
+    marginLeft: theme.spacing(1),
+  },
+  editButton: {
+    backgroundColor: '#f0ad4e',
+    color: '#ffffff'
   },
 }));
 
@@ -118,27 +128,27 @@ const OwnLunches = (props) => {
                 </tr>
               </tbody>
             </Table>
-            <br />
-            <Button
-              variant="outlined"
-              className={classes.button}
-              size="small"
-              style={{
-                color: '#DB4444',
-                borderColor: '#DB4444',
-                marginBottom: '-8px',
-              }}
-              href="#"
-            >
-              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
-            </Button>
           </CardContent>
+          <CardActions>
+            <Button className={classes.editButton} variant="contained">
+              Edit
+              <EditIcon className={classes.rightIcon} />
+            </Button>
+            <Button color="primary" variant="contained">
+              Delete
+              <DeleteIcon className={classes.rightIcon} />
+            </Button>
+          </CardActions>
         </Card>
       </Grid>
     );
   });
 
-  return <>{ownLunchItems}</>;
+  return (
+    <Grid container spacing={3}>
+      {ownLunchItems};
+    </Grid>
+  );
 };
 
 export default withFirebase(OwnLunches);
