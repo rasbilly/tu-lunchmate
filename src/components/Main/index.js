@@ -131,7 +131,11 @@ const LunchesGrid = (props) => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
       querySnapshot.forEach((doc) => {
-        newLunch.push(doc);
+        console.log(doc);
+        if(!doc.members.includes(firebase.auth.currentUser.uid)
+            && !(doc.owner==firebase.auth.currentUser.uid)){
+          newLunch.push(doc);
+        }
       });
       setlunches(newLunch);
       countOwnLunches();
@@ -148,7 +152,7 @@ const LunchesGrid = (props) => {
         const fetchOwnLunches = async () => {
           let z = 0;
           const qs = await firebase.getOwnLunches();
-          qs.forEach((card) => {
+          qs.forEach((doc) => {
             z += 1;
           });
           setCount(z);
@@ -206,7 +210,7 @@ const LunchesGrid = (props) => {
         const fetchJoinedLunches = async () => {
           let y = 0;
           const queryS = await firebase.getJoinedLunches();
-          queryS.forEach(() => {
+          queryS.forEach((doc) => {
             y += 1;
           });
           setNum(y);
@@ -223,7 +227,7 @@ const LunchesGrid = (props) => {
         <Card>
           <Typography variant="h5" style={{ textAlign: 'center' }}>
             <small>You have joined </small>
-            {count}
+            {num}
             <small> Lunch(es)</small>
           </Typography>
           <CardActions>
@@ -240,7 +244,10 @@ const LunchesGrid = (props) => {
           </CardActions>
           <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
             <CardContent>
-              <JoinedLunches/>
+              <JoinedLunches
+                  updateLunches={updateLunches}
+                  setUpdateLunches={setUpdateLunches}
+              />
             </CardContent>
           </Collapse>
         </Card>
@@ -264,6 +271,7 @@ const LunchesGrid = (props) => {
       startTimeStamp,
       memberCount,
       maxMembers,
+      id
     } = lunch;
 
     const startTime = startTimeStamp
@@ -336,6 +344,7 @@ const LunchesGrid = (props) => {
                 marginBottom: '-8px',
               }}
               href="#"
+              onClick={() => onJoinLunch(id)}
             >
               Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
             </Button>
@@ -344,6 +353,23 @@ const LunchesGrid = (props) => {
       </Grid>
     );
   });
+
+  function onJoinLunch(id) {
+    const props1 = props;
+    firebase
+        .joinLunch(
+            id
+        )
+        .then(function() {
+          props1.enqueueSnackbar('Lunch joined!', {
+            variant: 'success',
+          });
+          setCreateLunchOpen(false);
+          setUpdateLunches(!updateLunches);
+          countJoinedLunches()
+        })
+        .catch();
+  }
 
   function onCreateLunch() {
     const props1 = props;

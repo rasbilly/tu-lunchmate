@@ -100,7 +100,7 @@ class Firebase {
             endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
             maxMembers: maxUsers,
             memberCount: 1,
-            members: [uid],
+            members: [],
             owner: uid,
             mensa: mensa
         });
@@ -115,7 +115,7 @@ class Firebase {
             endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
             maxMembers: maxUsers,
             memberCount: 1,
-            members: [uid],
+            members: [],
             owner: uid,
             mensa: mensa
         });
@@ -127,20 +127,12 @@ class Firebase {
         .where("owner","==",this.auth.currentUser.uid).get();
     deleteLunch = (lunchID) => this.db.collection(lunches).doc(lunchID).delete();
     joinLunch = (lunchID) => {
-        const lunchRef = this.db.collection(lunches).doc(lunchID);
         const uid = this.auth.currentUser.uid;
-        return this.db.runTransaction(function (transaction) {
-            transaction.get(lunchRef).then(function (lunch) {
-                if (lunch.data().memberCount === lunch.data().maxMembers) {
-                    throw "This lunch is already full!"
-                } else {
-                    transaction.update(lunchRef,{
-                        memberCount: increment,
-                        members: firebase.firestore.FieldValue.arrayUnion(uid)
-                    })
-                }
-            })
-        })
+        return this.db.collection(lunches).doc(lunchID).update({
+            memberCount: increment,
+            members: firebase.firestore.FieldValue.arrayUnion(uid)
+        });
+
     };
     leaveLunch = (lunchID) => {
         const uid = this.auth.currentUser.uid;
@@ -153,11 +145,15 @@ class Firebase {
         const ctx = this;
         return new Promise(function (resolve, reject) {
             ctx.db.collection(lunches).get().then(function (snapshot) {
-                const lunchList = snapshot.docs.map(doc => doc.data());
+                const lunchList = snapshot.docs.map(doc => {
+                    var result = doc.data();
+                    result.id = doc.id;
+                    return result;
+                });
                 const freeLunches = [];
                 lunchList.some(function (lunch) {
                     if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
-                        if (lunch.memberCount<=lunch.maxMembers){
+                        if (lunch.memberCount<lunch.maxMembers){
                             freeLunches.push(lunch);
                         }
                     }

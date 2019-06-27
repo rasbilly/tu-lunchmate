@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 const JoinedLunches = (props) => {
     const classes = useStyles();
-    const { firebase } = props;
+    const { firebase, setUpdateLunches, updateLunches } = props;
     const [joinedLunches, setJoinedLunches] = useState([]);
     const [hasUpdated, setHasUpdated] = useState(false);
     const [activeModal, setActiveModal] = useState(false);
@@ -46,18 +46,17 @@ const JoinedLunches = (props) => {
                 newJoinedLunches.push({ id: doc.id, data: doc.data() });
             });
             console.log('joinedlunch');
-
             setJoinedLunches(newJoinedLunches);
         };
         fetchJoinedLunchData();
     }, [hasUpdated]);
 
-    // const deleteLunch = (id) => {
-    //     firebase.deleteLunch(id).then(() => {
-    //         setHasUpdated(!hasUpdated);
-    //         setUpdateLunches(!updateLunches);
-    //     });
-    // };
+    const leaveLunch = (id) => {
+        firebase.leaveLunch(id).then(() => {
+            setHasUpdated(!hasUpdated);
+            setUpdateLunches(!updateLunches);
+        });
+    };
 
     const joinedLunchItems = joinedLunches.map((lunch, index) => {
         const {
@@ -131,9 +130,9 @@ const JoinedLunches = (props) => {
                     </CardContent>
                     <CardActions>
                         <Button
-                            className={classes.editButton}
+                            color="primary"
                             variant="contained"
-                            /*onClick={() => leaveLunch(lunch)}*/
+                            onClick={() => leaveLunch(lunch.id)}
                         >
                             Leave
                         </Button>
