@@ -35,6 +35,7 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import InterestsForm from '../Registration/InterestsForm';
 import OwnLunches from './OwnLunches';
+import JoinedLunches from './JoinedLunches';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
 
@@ -238,12 +239,14 @@ const LunchesGrid = (props) => {
             </IconButton>
           </CardActions>
           <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
-            <CardContent />
+            <CardContent>
+              <JoinedLunches/>
+            </CardContent>
           </Collapse>
         </Card>
       );
     } else {
-      return <div className="hello">You have not created any Lunches.</div>;
+      return <div className="hello">You have not joined any Lunches.</div>;
     }
   };
 
