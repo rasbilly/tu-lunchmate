@@ -12,6 +12,7 @@ import {
   CardContent,
   Chip,
   Collapse,
+  SwipeableDrawer,
   Fab,
   Divider,
   Dialog,
@@ -33,6 +34,8 @@ import {
   TimePicker,
 } from '@material-ui/pickers';
 import AddIcon from '@material-ui/icons/Add';
+import CreateLunch from '../CreateLunch/CreateLunch';
+import Profile from "../Profile/Profile";
 import InterestsForm from '../Registration/InterestsForm';
 import OwnLunches from './OwnLunches';
 import JoinedLunches from './JoinedLunches';
@@ -106,6 +109,9 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     lineHeight: 2,
   },
+  drawer: {
+    background: "#313131"
+  }
 }));
 
 const LunchesGrid = (props) => {
@@ -125,6 +131,7 @@ const LunchesGrid = (props) => {
   const [clickedInterests, setClickedInterests] = useState([]);
   const [mensa, setMensa] = useState('');
   const [updateLunches, setUpdateLunches] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const fetchLunchData = async () => {
@@ -163,6 +170,16 @@ const LunchesGrid = (props) => {
     });
     return count > 0;
   }
+
+    //onclick openProfile
+    const toggleDrawer = (open) => event => {
+        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+        //TODO: save profile on close
+        setDrawerOpen(open);
+    };
+
   let showLunches = (
     <div className="hello">You haven't created any Lunches. See that red plus in the corner?</div>
   );
@@ -536,6 +553,14 @@ const LunchesGrid = (props) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+        <SwipeableDrawer
+            open={drawerOpen}
+            classes={{ paper: classes.drawer }}
+            onClose={toggleDrawer(false)}
+            onOpen={toggleDrawer(true)}>
+            <Profile/>
+        </SwipeableDrawer>
     </div>
   );
 };
