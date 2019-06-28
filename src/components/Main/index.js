@@ -41,6 +41,7 @@ import OwnLunches from './OwnLunches';
 import JoinedLunches from './JoinedLunches';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
+import {AccountCircle} from "@material-ui/icons";
 
 const authenticated = (authUser) => !!authUser;
 
@@ -431,9 +432,24 @@ const LunchesGrid = (props) => {
     <div className={classes.root}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={12} lg={12}>
-          <Typography component="h1" variant="h3" style={{ marginBottom: 16 }}>
-            Your Lunches
-          </Typography>
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <IconButton
+                  aria-label="Account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  edge="end"
+                  onClick={toggleDrawer(true)}
+                  color="inherit">
+                <AccountCircle/>
+              </IconButton>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography component="h1" variant="h3" style={{ marginBottom: 16 }}>
+                Your Lunches
+              </Typography>
+            </Grid>
+          </Grid>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               {showLunches}

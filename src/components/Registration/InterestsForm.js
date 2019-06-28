@@ -20,7 +20,7 @@ const InterestsForm = (props) => {
     clickedInterests,
   } = props;
   const [interests, setInterests] = useState([]);
-
+  console.log(updatedInterests);
   useEffect(() => {
     const fetchData = async () => {
       let newInterests = [];
@@ -98,9 +98,6 @@ const InterestsForm = (props) => {
 
   return (
     <>
-      <Typography className={classes.subtitle}>
-        Select your Interests
-      </Typography>
       <Grid container>
         <Grid item xs={12}>
           {clickedInterestsItems}

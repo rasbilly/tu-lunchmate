@@ -39,7 +39,7 @@ const Profile = (props) => {
     const [userObj, setUserObj] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [clickedInterests, setClickedInterests] = useState([]);
-    const [interests, setinterests] = useState([]);
+    const [updatedInterests, setUpdatedInterests] = useState([]);
 
     useEffect(() => {
         firebase.auth.onAuthStateChanged(function(user) {
@@ -52,12 +52,8 @@ const Profile = (props) => {
     }, []);
 
     useEffect(() => {
-        if (interests!==[] && userInfo!==[]) {
-            setinterests(interests.filter(x => !clickedInterests.includes(x)));
-            setUserInfo({...userInfo, interests: clickedInterests})
-        }
         if (clickedInterests && clickedInterests.length > 0) {
-            firebase.updateUserInterests(clickedInterests);
+            firebase.updateUserInterests(clickedInterests.map((interest) => interest.title),);
         }
     }, [clickedInterests]);
 
@@ -72,9 +68,9 @@ const Profile = (props) => {
 
     const fetchUserData = (uid) => {
         firebase.user(uid).then(function (snapshot) {
-            console.log(snapshot.data());
-            setUserInfo(snapshot.data());
-            setClickedInterests(snapshot.data().interests);
+            const data = snapshot.data();
+            setUserInfo(data);
+            setUpdatedInterests(data.interests);
         })
     };
 
@@ -163,8 +159,7 @@ const Profile = (props) => {
                 <InterestsForm
                 setClickedInterests={setClickedInterests}
                 clickedInterests={clickedInterests}
-                interests={interests}
-                setinterests={setinterests}/>
+                updatedInterests={updatedInterests}/>
             </Grid>
             <Grid item xs={12}>
                 <Button  className={classes.btn} variant="outlined" onClick={resetPw}>Reset Password</Button>
