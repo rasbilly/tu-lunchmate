@@ -5,6 +5,7 @@ import {Container, Avatar, TextField, Grid, Button, Typography, CssBaseline, Dia
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import InterestsForm from "../Registration/InterestsForm";
 import {withSnackbar} from "notistack";
+import ProfilePicSelecter from "../ProfilePic/ProfilePicSelecter";
 
 const useStyles = makeStyles(theme => ({
     '@global': {
@@ -39,6 +40,7 @@ const Profile = (props) => {
     const [userObj, setUserObj] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [clickedInterests, setClickedInterests] = useState([]);
+    const [croppedImage, setCroppedImage] = useState(null);
 
     useEffect(() => {
         firebase.auth.onAuthStateChanged(function(user) {
@@ -68,6 +70,7 @@ const Profile = (props) => {
         firebase.user(uid).then(function (snapshot) {
             const data = snapshot.data();
             setUserInfo(data);
+            setCroppedImage(data.photoURL);
             setClickedInterests(data.interests);
         })
     };
@@ -109,10 +112,10 @@ const Profile = (props) => {
                 <CssBaseline />
                 <Grid justify="center" direction="column" alignItems="center" container spacing={2}>
                     <Grid item xs={12}>
-                        <Avatar align='center' className={classes.bigAvatar} src={userObj && userObj.photoURL}/>
+                        <ProfilePicSelecter croppedImage={croppedImage} setCroppedImage={setCroppedImage}/>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography className={classes.text} variant='h3' align='center'>{userObj && userObj.displayName}</Typography>
+                        <Typography className={classes.text} variant='h3' align='center'>{userInfo && userInfo.name}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <TextField

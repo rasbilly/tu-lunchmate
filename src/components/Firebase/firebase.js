@@ -69,14 +69,17 @@ class Firebase {
         name : name,
         description: "You don't have a description yet. Click here to change that"
     });
-    setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
-        displayName: name,
-        photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
-    });
-    //get profile pic url from db location
-    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser.uid).getDownloadURL();
     //get default profile pic url
     defaultProfilePicUrl = () => this.storage.ref(defprofilepicRef).getDownloadURL();
+    //update photourl
+    updateProfilePic = (url) => this.db.collection(users).doc(this.auth.currentUser.uid).update({
+        photoURL: (url) ? url : this.defaultProfilePicUrl()
+    });
+    //get profile pic url from db location
+    profilePicURL = (uid) => {
+        const userID = uid ? uid : this.auth.currentUser.uid;
+        return this.storage.ref('profile_pictures/'+userID).getDownloadURL();
+    };
     //upload pic and get profile pic url in return
     uploadProfilePic = (picture) => this.storage
         .ref('profile_pictures/'+this.auth.currentUser.uid)
