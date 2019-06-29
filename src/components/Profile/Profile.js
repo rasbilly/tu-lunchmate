@@ -39,7 +39,6 @@ const Profile = (props) => {
     const [userObj, setUserObj] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [clickedInterests, setClickedInterests] = useState([]);
-    const [updatedInterests, setUpdatedInterests] = useState([]);
 
     useEffect(() => {
         firebase.auth.onAuthStateChanged(function(user) {
@@ -53,12 +52,11 @@ const Profile = (props) => {
 
     useEffect(() => {
         if (clickedInterests && clickedInterests.length > 0) {
-            firebase.updateUserInterests(clickedInterests.map((interest) => interest.title),);
+            firebase.updateUserInterests(clickedInterests);
         }
     }, [clickedInterests]);
 
     useEffect(()=>{
-        console.log(userInfo);
         if (userInfo != null) {
             if (userInfo.major&&userInfo.description) {
                 firebase.updateUserBio(userInfo.major, userInfo.description);
@@ -70,7 +68,7 @@ const Profile = (props) => {
         firebase.user(uid).then(function (snapshot) {
             const data = snapshot.data();
             setUserInfo(data);
-            setUpdatedInterests(data.interests);
+            setClickedInterests(data.interests);
         })
     };
 
@@ -158,8 +156,7 @@ const Profile = (props) => {
             <Grid item xs={12}>
                 <InterestsForm
                 setClickedInterests={setClickedInterests}
-                clickedInterests={clickedInterests}
-                updatedInterests={updatedInterests}/>
+                clickedInterests={clickedInterests}/>
             </Grid>
             <Grid item xs={12}>
                 <Button  className={classes.btn} variant="outlined" onClick={resetPw}>Reset Password</Button>

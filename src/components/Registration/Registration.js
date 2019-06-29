@@ -82,8 +82,7 @@ const Registration = (props) => {
         const [croppedImage, setCroppedImage] = useState(null);
         //interests form
         const [clickedInterests, setClickedInterests] = useState([]);
-        const [interests, setinterests] = useState([]);
-    //submission
+        //submission
         const [finished, setFinished] = useState(false);
 
 
@@ -169,7 +168,7 @@ const Registration = (props) => {
       case 1:
         return <ProfilePicForm  setMajor={setMajor} major={major} setCroppedImage={setCroppedImage} croppedImage={croppedImage}/>;
       case 2:
-        return <InterestsForm setClickedInterests={setClickedInterests} interests={interests} setinterests={setinterests} clickedInterests={clickedInterests}/>;
+        return <InterestsForm setClickedInterests={setClickedInterests} clickedInterests={clickedInterests}/>;
       default:
         throw new Error('Unknown step');
     }

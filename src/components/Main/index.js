@@ -320,7 +320,7 @@ const LunchesGrid = (props) => {
 
     return (
       // The grid breakpoints are for responsive Design, DO NOT CHANGE
-      <Grid key={index} item xs={12} sm={6} lg={4} xl={3}>
+      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
         <Card>
           {/* No style needed, spacing of grid handles everything! */}
           <CardContent>

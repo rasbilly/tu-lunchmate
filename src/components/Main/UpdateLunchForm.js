@@ -43,7 +43,6 @@ const UpdateLunchForm = (props) => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [clickedInterests, setClickedInterests] = useState([]);
-  const [updatedInterests, setUpdatedInterests] = useState([]);
   const [mensa, setMensa] = useState('');
 
   useEffect(() => {
@@ -58,7 +57,7 @@ const UpdateLunchForm = (props) => {
     setEndDate(end);
     setMensa(data.mensa);
     setDesc(data.description);
-    setUpdatedInterests(data.interests);
+    setClickedInterests(data.interests);
     setMaxmembers(data.maxMembers);
   };
 
@@ -81,7 +80,7 @@ const UpdateLunchForm = (props) => {
       .updateLunch(
         title,
         desc,
-        clickedInterests.map((interest) => interest.title),
+        clickedInterests,
         startDate,
         endDate,
         maxMembers,
@@ -175,7 +174,6 @@ const UpdateLunchForm = (props) => {
         <InterestsForm
           setClickedInterests={setClickedInterests}
           clickedInterests={clickedInterests}
-          updatedInterests={updatedInterests}
         />
       </DialogContent>
       <DialogActions>
