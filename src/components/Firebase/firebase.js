@@ -33,7 +33,6 @@ class Firebase {
         this.auth.signInWithEmailAndPassword(email, password);
       signOut = () => this.auth.signOut();
       resetPassword = email => this.auth.sendPasswordResetEmail(email);
-      updatePassword = password => this.auth.currentUser.updatePassword(password);
       //get user from db and combine with object to store in cache
       onAuthUserListener = (next, fallback) =>
           this.auth.onAuthStateChanged(authUser => {
@@ -57,9 +56,6 @@ class Firebase {
               fallback();
             }
           });
-
-    //Get user
-    user = uid => this.db.collection(users).doc(uid).get();
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
@@ -67,23 +63,23 @@ class Firebase {
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
-    createUserInDB = (uid, major, interests) => this.db.collection(users).doc(uid).set({
+    createUserInDB = (uid, major, interests, name) => this.db.collection(users).doc(uid).set({
         major: major,
-        interests: interests
+        interests: interests,
+        name : name,
+        description: "You don't have a description yet. Click here to change that"
     });
-    setUserBio =  (major, interests) => this.db.collection(users).doc(this.auth.currentUser.uid)
-        .set({
-            major: major,
-            interests: interests
-        });
-    setProfile = (name, photoURL) => this.auth.currentUser.updateProfile({
-        displayName: name,
-        photoURL: (photoURL) ? photoURL : this.defaultProfilePicUrl
-    });
-    //get profile pic url from db location
-    profilePicURL = () => this.storage.ref('profile_pictures/'+this.auth.currentUser.uid).getDownloadURL();
     //get default profile pic url
     defaultProfilePicUrl = () => this.storage.ref(defprofilepicRef).getDownloadURL();
+    //update photourl
+    updateProfilePic = (url) => this.db.collection(users).doc(this.auth.currentUser.uid).update({
+        photoURL: (url) ? url : this.defaultProfilePicUrl()
+    });
+    //get profile pic url from db location
+    profilePicURL = (uid) => {
+        const userID = uid ? uid : this.auth.currentUser.uid;
+        return this.storage.ref('profile_pictures/'+userID).getDownloadURL();
+    };
     //upload pic and get profile pic url in return
     uploadProfilePic = (picture) => this.storage
         .ref('profile_pictures/'+this.auth.currentUser.uid)
@@ -100,7 +96,22 @@ class Firebase {
             endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
             maxMembers: maxUsers,
             memberCount: 1,
-            members: [uid],
+            members: [],
+            owner: uid,
+            mensa: mensa
+        });
+    };
+    updateLunch = (title, description, interests, startTimeStamp, endTimeStamp, maxUsers, mensa, lunchID) => {
+        const uid = this.auth.currentUser.uid;
+        return this.db.collection(lunches).doc(lunchID).update({
+            title: title,
+            description: description,
+            interests: interests,
+            startTimeStamp: firebase.firestore.Timestamp.fromDate(startTimeStamp),
+            endTimeStamp: firebase.firestore.Timestamp.fromDate(endTimeStamp),
+            maxMembers: maxUsers,
+            memberCount: 1,
+            members: [],
             owner: uid,
             mensa: mensa
         });
@@ -112,20 +123,12 @@ class Firebase {
         .where("owner","==",this.auth.currentUser.uid).get();
     deleteLunch = (lunchID) => this.db.collection(lunches).doc(lunchID).delete();
     joinLunch = (lunchID) => {
-        const lunchRef = this.db.collection(lunches).doc(lunchID);
         const uid = this.auth.currentUser.uid;
-        return this.db.runTransaction(function (transaction) {
-            transaction.get(lunchRef).then(function (lunch) {
-                if (lunch.data().memberCount === lunch.data().maxMembers) {
-                    throw "This lunch is already full!"
-                } else {
-                    transaction.update(lunchRef,{
-                        memberCount: increment,
-                        members: firebase.firestore.FieldValue.arrayUnion(uid)
-                    })
-                }
-            })
-        })
+        return this.db.collection(lunches).doc(lunchID).update({
+            memberCount: increment,
+            members: firebase.firestore.FieldValue.arrayUnion(uid)
+        });
+
     };
     leaveLunch = (lunchID) => {
         const uid = this.auth.currentUser.uid;
@@ -138,11 +141,15 @@ class Firebase {
         const ctx = this;
         return new Promise(function (resolve, reject) {
             ctx.db.collection(lunches).get().then(function (snapshot) {
-                const lunchList = snapshot.docs.map(doc => doc.data());
+                const lunchList = snapshot.docs.map(doc => {
+                    var result = doc.data();
+                    result.id = doc.id;
+                    return result;
+                });
                 const freeLunches = [];
                 lunchList.some(function (lunch) {
                     if (lunch.hasOwnProperty("maxMembers") && lunch.hasOwnProperty("memberCount")) {
-                        if (lunch.memberCount<=lunch.maxMembers){
+                        if (lunch.memberCount<lunch.maxMembers){
                             freeLunches.push(lunch);
                         }
                     }
@@ -157,7 +164,7 @@ class Firebase {
     sortLunchesByInterests = (lunches) => {
         const ctx = this;
         return new Promise(function (resolve, reject) {
-            this.db.collection(users).doc(this.auth.currentUser.uid).get().then(function (doc) {
+            ctx.db.collection(users).doc(ctx.auth.currentUser.uid).get().then(function (doc) {
                 const interests = doc.data().interests;
                 resolve(rankAndSort(interests, lunches));
             }).catch(function (error) {
@@ -166,6 +173,20 @@ class Firebase {
             })
         });
     };
+    //profile page requests
+    setUserDesc = (description) => this.db.collection(users).doc(this.auth.currentUser.uid).set({description: description});
+    updateUserInterests = (interests) => this.db.collection(users).doc(this.auth.currentUser.uid).update({interests: interests});
+    //updating profile pic, etc. all the same as registration... so see above
+    updateUserBio =  (major, description) => this.db.collection(users).doc(this.auth.currentUser.uid)
+        .update({
+            major: major,
+            description: description
+        });
+    //Get user
+    user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user
+    //Get user profile picture url
+    userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
+    sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
@@ -199,5 +220,4 @@ function filterByUserCount(min, max, lunches) {
     });
     return newList;
 }
-
 export default Firebase;

@@ -11,18 +11,44 @@ import {
   CardActions,
   CardContent,
   Chip,
+  Collapse,
+  SwipeableDrawer,
   Fab,
+  Divider,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  Table,
 } from '@material-ui/core';
-
+import clsx from 'clsx';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import DateFnsUtils from '@date-io/date-fns';
+import {
+  DateTimePicker,
+  MuiPickersUtilsProvider,
+  TimePicker,
+} from '@material-ui/pickers';
 import AddIcon from '@material-ui/icons/Add';
 import CreateLunch from '../CreateLunch/CreateLunch';
+import Profile from "../Profile/Profile";
+import InterestsForm from '../Registration/InterestsForm';
+import OwnLunches from './OwnLunches';
+import JoinedLunches from './JoinedLunches';
+import { withSnackbar } from 'notistack';
+import IconButton from '@material-ui/core/IconButton';
+import {AccountCircle} from "@material-ui/icons";
 
 const authenticated = (authUser) => !!authUser;
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
     body: {
-      backgroundColor: theme.palette.common.white,
+      backgroundColor: '#eeeeee',
     },
   },
   root: {
@@ -47,13 +73,8 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(1),
     margin: `${theme.spacing(1)}px auto`,
   },
-  card: {
-    maxWidth: 345,
-    marginRight: 10,
-    marginBottom: 20,
-  },
   media: {
-    height: 140,
+    height: 0,
   },
   button: {
     width: '100%',
@@ -70,37 +91,77 @@ const useStyles = makeStyles((theme) => ({
     bottom: 20,
     left: 'auto',
     position: 'fixed',
+    backgroundColor: '#db4444',
+    color: 'white',
   },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
+  column: {
+    color: 'rgba(0, 0, 0, 0.54)',
+    fontSize: 14,
+    fontWeight: 600,
+    lineHeight: 2,
+  },
+  drawer: {
+    background: "#313131"
+  }
 }));
 
 const LunchesGrid = (props) => {
   const classes = useStyles();
   const { firebase } = props;
   const [lunches, setlunches] = useState([]);
-  const [createdLunch, setCreatedLunch] = useState(false);
+  const [createLunchOpen, setCreateLunchOpen] = useState(false);
+  const [ownExpanded, setOwnExpanded] = useState(false);
+  const [joinedExpanded, setJoinedExpanded] = useState(false);
+
+  //create lunch attributes
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [maxMembers, setMaxmembers] = useState(2);
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [clickedInterests, setClickedInterests] = useState([]);
+  const [mensa, setMensa] = useState('');
+  const [updateLunches, setUpdateLunches] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
-      querySnapshot.forEach((doc) => {
-          console.log(doc)
-        newLunch.push(doc);
+      const sortedSnapshot = await firebase.sortLunchesByInterests(querySnapshot);
+      sortedSnapshot.forEach((doc) => {
+        console.log(doc);
+        if(!doc.members.includes(firebase.auth.currentUser.uid)
+            && !(doc.owner==firebase.auth.currentUser.uid)){
+          newLunch.push(doc);
+        }
       });
       setlunches(newLunch);
+      countOwnLunches();
     };
     fetchLunchData();
-  }, [createdLunch]);
+  }, [updateLunches]);
 
   //Zählt meine Lunches durch und gibt sie summiert als Zahl aus
   const [count, setCount] = useState('');
-  function countMyLunches() {
+
+  function countOwnLunches() {
     firebase.auth.onAuthStateChanged(function(user) {
       if (user) {
         const fetchOwnLunches = async () => {
           let z = 0;
           const qs = await firebase.getOwnLunches();
-          qs.forEach(() => {
+          qs.forEach((doc) => {
             z += 1;
           });
           setCount(z);
@@ -111,27 +172,113 @@ const LunchesGrid = (props) => {
     return count > 0;
   }
 
-  //onclick openProfile
+    //onclick openProfile
+    const toggleDrawer = (open) => event => {
+        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+        //TODO: save profile on close
+        setDrawerOpen(open);
+    };
 
-  //onclick joinLunch
+  let showLunches = (
+    <div className="hello">You haven't created any Lunches. See that red plus in the corner?</div>
+  );
+  if (countOwnLunches()) {
+    showLunches = (
+      <Card>
+        <Typography variant="h5" style={{ textAlign: 'center' }}>
+          <small>You have created </small>
+          {count}
+          <small> Lunch(es)</small>
+        </Typography>
+        <CardActions>
+          <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: ownExpanded,
+            })}
+            onClick={handleOwnExpandClick}
+            aria-expanded={ownExpanded}
+            aria-label="Show more"
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+        </CardActions>
+        <Collapse in={ownExpanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <OwnLunches
+              updateLunches={updateLunches}
+              setUpdateLunches={setUpdateLunches}
+            />
+          </CardContent>
+        </Collapse>
+      </Card>
+    );
+  }
 
-  const ShowMyLunches = () => {
-    if (countMyLunches()) {
+  function handleOwnExpandClick() {
+    setOwnExpanded(!ownExpanded);
+  }
+
+  //do same with joined lunches
+  const [num, setNum] = useState('');
+
+  function countJoinedLunches() {
+    firebase.auth.onAuthStateChanged(function(user) {
+      if (user) {
+        const fetchJoinedLunches = async () => {
+          let y = 0;
+          const queryS = await firebase.getJoinedLunches();
+          queryS.forEach((doc) => {
+            y += 1;
+          });
+          setNum(y);
+        };
+        fetchJoinedLunches();
+      }
+    });
+    return num > 0;
+  }
+
+  const ShowJoinedLunches = () => {
+    if (countJoinedLunches()) {
       return (
-        <div>
-          <Typography variant="h6" style={{ textAlign: 'center' }}>
-            You have created
-          </Typography>
+        <Card>
           <Typography variant="h5" style={{ textAlign: 'center' }}>
-            {count}
-            <small> Lunches.</small>
+            <small>You have joined </small>
+            {num}
+            <small> Lunch(es)</small>
           </Typography>
-        </div>
+          <CardActions>
+            <IconButton
+              className={clsx(classes.expand, {
+                [classes.expandOpen]: joinedExpanded,
+              })}
+              onClick={handleJoinedExpandClick}
+              aria-expanded={joinedExpanded}
+              aria-label="Show more"
+            >
+              <ExpandMoreIcon />
+            </IconButton>
+          </CardActions>
+          <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
+            <CardContent>
+              <JoinedLunches
+                  updateLunches={updateLunches}
+                  setUpdateLunches={setUpdateLunches}
+              />
+            </CardContent>
+          </Collapse>
+        </Card>
       );
     } else {
-      return <div className="hello">You have not created any Lunches.</div>;
+      return <div className="hello">You haven't joined any Lunches.</div>;
     }
   };
+
+  function handleJoinedExpandClick() {
+    setJoinedExpanded(!joinedExpanded);
+  }
 
   const lunchItems = lunches.map((lunch, index) => {
     const {
@@ -143,6 +290,7 @@ const LunchesGrid = (props) => {
       startTimeStamp,
       memberCount,
       maxMembers,
+      id
     } = lunch;
 
     const startTime = startTimeStamp
@@ -166,12 +314,15 @@ const LunchesGrid = (props) => {
         label={interest}
         color="primary"
         className={classes.chip}
+        component={'div'}
       />
     ));
 
     return (
-      <Grid key={index} item xs={12} sm={6}>
-        <Card className={classes.card}>
+      // The grid breakpoints are for responsive Design, DO NOT CHANGE
+      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
+        <Card>
+          {/* No style needed, spacing of grid handles everything! */}
           <CardContent>
             <Typography gutterBottom variant="h5" component="h2">
               {title}
@@ -179,85 +330,142 @@ const LunchesGrid = (props) => {
             <Typography color="textSecondary" component="p">
               {description}
             </Typography>
-
-            <Typography variant="body2" color="textSecondary" component="p">
-              {startTime} - {endTime} on {date}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" component="p">
-              Mensa: {mensa}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" component="p">
-              {memberCount}/{maxMembers} have joined
-            </Typography>
-            {chips}
-          </CardContent>
-          <CardActions>
+            <div>{chips}</div>
+            <br />
+            <Divider component="div" />
+            <br />
+            <Table>
+              <tbody>
+                <tr>
+                  <td className={classes.column}>Mensa</td>
+                  <td>{mensa}</td>
+                </tr>
+                <tr>
+                  <td className={classes.column}>Date</td>
+                  <td>{date}</td>
+                </tr>
+                <tr>
+                  <td className={classes.column}>Time</td>
+                  <td>
+                    {startTime} - {endTime}
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
+            <br />
             <Button
-              variant="contained"
-              color="primary"
+              variant="outlined"
               className={classes.button}
               size="small"
+              style={{
+                color: '#DB4444',
+                borderColor: '#DB4444',
+                marginBottom: '-8px',
+              }}
+              href="#"
+              onClick={() => onJoinLunch(id)}
             >
-              Join
+              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
             </Button>
-          </CardActions>
+          </CardContent>
         </Card>
       </Grid>
     );
   });
 
-  const [createLunchOpen, setCreateLunchOpen] = useState(false);
-
-  function handleClickOpen() {
-    setCreateLunchOpen(!createLunchOpen);
+  function onJoinLunch(id) {
+    const props1 = props;
+    firebase
+        .joinLunch(
+            id
+        )
+        .then(function() {
+          props1.enqueueSnackbar('Lunch joined!', {
+            variant: 'success',
+          });
+          setCreateLunchOpen(false);
+          setUpdateLunches(!updateLunches);
+          countJoinedLunches()
+        })
+        .catch();
   }
+
+  function onCreateLunch() {
+    const props1 = props;
+    endDate.setDate(startDate.getDate());
+    endDate.setFullYear(startDate.getFullYear());
+    endDate.setMonth(startDate.getMonth());
+    firebase
+      .createLunch(
+        title,
+        desc,
+        clickedInterests.map((interest) => interest.title),
+        startDate,
+        endDate,
+        maxMembers,
+        mensa,
+      )
+      .then(function() {
+        props1.enqueueSnackbar('Lunch created!', {
+          variant: 'success',
+        });
+        setCreateLunchOpen(false);
+        setUpdateLunches(!updateLunches);
+      })
+      .catch();
+  }
+
+  function handleCloseCreateLunch() {
+    setCreateLunchOpen(false);
+  }
+
+  const handleStartTimeChange = (date) => setStartDate(date);
+  const handleEndTimeChange = (date) => setEndDate(date);
+
+  const menuItems = () => {
+    let its = [];
+    for (let i = 2; i < 7; i++) its.push(<MenuItem value={i}>{i}</MenuItem>);
+    return its;
+  };
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={0}>
-        <Grid item xs={4}>
-          <Grid container direction="column" wrap="nowrap" spacing={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={12} lg={12}>
+          <Grid container spacing={1}>
             <Grid item xs={6}>
-              <Paper classname={classes.paper}>
-                <Typography variant="h6" style={{ textAlign: 'center' }}>
-                  <ShowMyLunches />
-                </Typography>
-                <Button
-                  onClick={handleClickOpen}
-                  variant="contained"
-                  color="primary"
-                  className={classes.button}
-                  style={{ position: 'center' }}
-                >
-                  Create Lunch
-                </Button>
-              </Paper>
+              <IconButton
+                  aria-label="Account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  edge="end"
+                  onClick={toggleDrawer(true)}
+                  color="inherit">
+                <AccountCircle/>
+              </IconButton>
             </Grid>
             <Grid item xs={6}>
-              <Paper classname={classes.paper}>
-                <Typography variant="h6" style={{ textAlign: 'center' }}>
-                  You have joined
-                </Typography>
-                <Typography variant="h5" style={{ textAlign: 'center' }}>
-                  2 <small>Lunches</small>
-                </Typography>
-                <Button
-                  className={classes.button}
-                  variant="contained"
-                  color="primary"
-                  style={{ position: 'center' }}
-                >
-                  Show
-                </Button>
-              </Paper>
+              <Typography component="h1" variant="h3" style={{ marginBottom: 16 }}>
+                Your Lunches
+              </Typography>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={8}>
-          <Typography component="h1" variant="h2">
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              {showLunches}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ShowJoinedLunches />
+            </Grid>
+          </Grid>
+          <Typography
+            component="h1"
+            variant="h3"
+            style={{ marginBottom: 16, marginTop: 32 }}
+          >
             Available Lunches
           </Typography>
-          <Grid container>
+          <Grid container spacing={3}>
             {lunchItems ? (
               lunchItems
             ) : (
@@ -269,20 +477,110 @@ const LunchesGrid = (props) => {
         </Grid>
       </Grid>
       <Fab
-        color="secondary"
         aria-label="Add"
         className={classes.fab}
         onClick={() => setCreateLunchOpen(true)}
       >
         <AddIcon />
       </Fab>
-      <CreateLunch
-        firebase={firebase}
-        active={createLunchOpen}
-        setCreatedLunch={setCreatedLunch}
-      />
+      <Dialog
+        open={createLunchOpen}
+        onClose={handleCloseCreateLunch}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle id="form-dialog-title">Create Lunch</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="title"
+            onChange={(e) => {
+              setTitle(e.target.value);
+            }}
+            value={title}
+            label="Title"
+            type="text"
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            onChange={(e) => {
+              setDesc(e.target.value);
+            }}
+            value={desc}
+            id="description"
+            label="Description"
+            type="text"
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            onChange={(e) => {
+              setMensa(e.target.value);
+            }}
+            value={mensa}
+            id="mensa"
+            label="Mensa"
+            type="text"
+            fullWidth
+          />
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <DateTimePicker
+              label="Lunch start time"
+              onChange={handleStartTimeChange}
+              value={startDate}
+              ampm={false}
+              margin="dense"
+            />
+            <TimePicker
+              label="Lunch end time"
+              onChange={handleEndTimeChange}
+              value={endDate}
+              ampm={false}
+              margin="dense"
+            />
+          </MuiPickersUtilsProvider>
+          <InputLabel htmlFor="maxMembers-select">
+            Max amount of members
+          </InputLabel>
+          <Select
+            value={maxMembers}
+            onChange={(e) => {
+              setMaxmembers(e.target.value);
+            }}
+            inputProps={{
+              name: 'maxMembers',
+              id: 'maxMembers-select',
+            }}
+          >
+            {menuItems()}
+          </Select>
+          <InterestsForm
+            setClickedInterests={setClickedInterests}
+            clickedInterests={clickedInterests}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCreateLunch} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={onCreateLunch} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+        <SwipeableDrawer
+            open={drawerOpen}
+            classes={{ paper: classes.drawer }}
+            onClose={toggleDrawer(false)}
+            onOpen={toggleDrawer(true)}>
+            <Profile/>
+        </SwipeableDrawer>
     </div>
   );
 };
-
-export default compose(withAuthorization(authenticated))(LunchesGrid);
+export default compose(
+  withSnackbar,
+  withAuthorization(authenticated),
+)(LunchesGrid);
