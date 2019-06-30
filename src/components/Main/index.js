@@ -133,8 +133,28 @@ const LunchesGrid = (props) => {
   const [mensa, setMensa] = useState('');
   const [updateLunches, setUpdateLunches] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
+    askPushNotifPermission();
+    //listener to tokens
+    firebase.messaging.onTokenRefresh(function () {
+      messaging.getToken()
+          .then(function(refreshedToken) {
+            console.log('Token refreshed.');
+            setToken(refreshedToken);
+          })
+          .catch(function(err) {
+            console.log('Unable to retrieve refreshed token ', err);
+          });
+    });
+    //listener for foreground notifications
+    firebase.messaging.onMessage((payload) => {
+      console.log('Message received. ', payload);
+      props.enqueueSnackbar(payload.notification.body,{
+        variant: 'info',
+      });
+    });
     const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
@@ -151,6 +171,19 @@ const LunchesGrid = (props) => {
     };
     fetchLunchData();
   }, [updateLunches]);
+
+  //asks user for notifications permissions
+  const askPushNotifPermission = async () => {
+    try {
+      await firebase.messaging.requestPermission();
+      firebase.messaging.getToken().then(function (token) {
+        console.log("token:",token);
+        setToken(token);
+      })
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   //Zählt meine Lunches durch und gibt sie summiert als Zahl aus
   const [count, setCount] = useState('');
@@ -266,6 +299,7 @@ const LunchesGrid = (props) => {
               <JoinedLunches
                   updateLunches={updateLunches}
                   setUpdateLunches={setUpdateLunches}
+                  token={token}
               />
             </CardContent>
           </Collapse>
@@ -383,6 +417,8 @@ const LunchesGrid = (props) => {
           props1.enqueueSnackbar('Lunch joined!', {
             variant: 'success',
           });
+          //get notifications for this lunch
+          firebase.subscribeToLunch(id, token).catch((e)=>console.log(e));
           setCreateLunchOpen(false);
           setUpdateLunches(!updateLunches);
           countJoinedLunches()
@@ -405,7 +441,9 @@ const LunchesGrid = (props) => {
         maxMembers,
         mensa,
       )
-      .then(function() {
+      .then(function(docref) {
+        //get notifications for this lunch
+        firebase.subscribeToLunch(docref.id, token).catch((e)=>console.log(e));
         props1.enqueueSnackbar('Lunch created!', {
           variant: 'success',
         });
