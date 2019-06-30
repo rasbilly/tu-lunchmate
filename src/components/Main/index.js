@@ -242,6 +242,7 @@ const LunchesGrid = (props) => {
             <OwnLunches
               updateLunches={updateLunches}
               setUpdateLunches={setUpdateLunches}
+              token={token}
             />
           </CardContent>
         </Collapse>

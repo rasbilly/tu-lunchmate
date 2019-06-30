@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 const OwnLunches = (props) => {
   const classes = useStyles();
-  const { firebase, setUpdateLunches, updateLunches } = props;
+  const { firebase, setUpdateLunches, updateLunches, token} = props;
   const [ownLunches, setOwnLunches] = useState([]);
   const [hasUpdated, setHasUpdated] = useState(false);
   const [activeModal, setActiveModal] = useState(false);
@@ -64,6 +64,8 @@ const OwnLunches = (props) => {
 
   const deleteLunch = (id) => {
     firebase.deleteLunch(id).then(() => {
+      //unsub from push messages after deleting
+      firebase.unSubscribeFromLunch(id, token).catch((e)=>console.log(e));
       setHasUpdated(!hasUpdated);
       setUpdateLunches(!updateLunches);
     });
