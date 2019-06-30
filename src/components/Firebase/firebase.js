@@ -15,6 +15,7 @@ const config = {
 
 const lunches = "lunches";
 const users = "users";
+const interests = "interests";
 const increment = firebase.firestore.FieldValue.increment(1);
 const decrement = firebase.firestore.FieldValue.increment(-1);
 
@@ -26,6 +27,7 @@ class Firebase {
     this.auth = app.auth();
     this.db = app.firestore();
     this.storage = app.storage();
+    this.functions = app.functions();
   }
 
       //Auth functions
@@ -59,7 +61,7 @@ class Firebase {
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
-    interests = () => this.db.collection("interests").get();
+    interests = () => this.db.collection(interests).get();
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
@@ -98,6 +100,8 @@ class Firebase {
             memberCount: 1,
             members: [],
             owner: uid,
+            reportCount: 0,
+            reports : [],
             mensa: mensa
         });
     };
@@ -187,6 +191,27 @@ class Firebase {
     //Get user profile picture url
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
+
+    //admin related functionality
+    deleteUserByEmail = (email) => {
+        const deleteWithEmail = this.functions.httpsCallable('registerUserToTopic');
+        return deleteWithEmail({
+            uid : this.auth.currentUser.uid,
+            email : email
+        })
+    };
+    //set reports to zero
+    removeReports = (docID) => this.db.collection(lunches).doc(docID).update({
+        reports: [],
+        reportCount: 0
+    });
+    //create interest
+    addInterest = (title, desc) => this.db.collection(interests).doc().set({
+        title: title,
+        desc: desc
+    });
+    //delete interest
+    deleteInterest = (id) => this.db.collection(interests).doc(id).delete();
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
