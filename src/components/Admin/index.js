@@ -18,7 +18,7 @@ import {
     ListItemSecondaryAction,
     ListItemText,
     IconButton,
-    Typography, Paper, CircularProgress
+    Typography, Paper, CircularProgress, Card, CardContent, CardActions, Grid
 } from "@material-ui/core";
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
@@ -58,12 +58,18 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         alignItems: 'center',
     },
+    reportedLunchesRoot : {
+        backgroundColor: '#eeeeee',
+    },
     rightIcon: {
         marginLeft: theme.spacing(1),
     },
     textField : {
         maxWidth: 500
-    }
+    },
+    card: {
+        minWidth: 275,
+    },
 }));
 
 const Admin = (props) => {
@@ -131,12 +137,67 @@ const Admin = (props) => {
         );
     });
 
+    function onDeleteReportedLunch(id) {
+        firebase.deleteLunch(id).then(function () {
+            props.enqueueSnackbar('Lunch deleted!', {
+                variant: 'success',
+            });
+            fetchReportedLunches();
+        }).catch(function (err) {
+            console.error("Error deleting interest",err);
+            props.enqueueSnackbar('Something went wrong :(', {
+                variant: 'error',
+            });
+        })
+    }
+
+    function onClearReportedLunch(id) {
+        firebase.removeReports(id).then(function () {
+            props.enqueueSnackbar("Lunch doesn't have any reports now :)", {
+                variant: 'success',
+            });
+            fetchReportedLunches();
+        }).catch(function (err) {
+            console.error("Error deleting interest",err);
+            props.enqueueSnackbar('Something went wrong :(', {
+                variant: 'error',
+            });
+        })
+    }
+
+    const lunchItems = reportedLunches.map((lunch, index) => {
+        const {title, description, id} = lunch;
+        return(
+            <Grid key={index} item xs={12}>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h5" component="h1" gutterBottom>
+                            {title}
+                        </Typography>
+                        <Typography variant="h6" component="h2" color="textSecondary">
+                            {description}
+                        </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Button size="small" onClick={()=> onDeleteReportedLunch(id)}>Delete</Button>
+                        <Button size="small" onClick={()=> onClearReportedLunch(id)}>Absolve from all sins</Button>
+                    </CardActions>
+                </Card>
+            </Grid>
+        );
+    });
+
     async function fetchReportedLunches() {
+        setLoading(true);
         let reportedLunches = [];
         const snapshot = await firebase.getReportedLunches();
         snapshot.forEach((doc) => {
-            reportedLunches.push(doc.data());
+            console.log("lunch: ", doc.data());
+            const lunch = doc.data();
+            lunch.id = doc.id;
+            reportedLunches.push(lunch);
         });
+        setLoading(false);
         setReportedLunches(reportedLunches);
     }
 
@@ -232,7 +293,23 @@ const Admin = (props) => {
                 axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
                 index={value}
                 onChangeIndex={handleChangeIndex}>
-                <TabContainer dir={theme.direction}></TabContainer>
+                <TabContainer dir={theme.direction}>
+                    <div>
+                        <Grid container direction="column" spacing={1}>
+                            {loading ? (
+                                <CircularProgress/>
+                            ):(
+                                <div>
+                                    {lunchItems.length === 0 ? (
+                                        <Typography variant='h4'>Looks like your job is done for today :)</Typography>
+                                    ) : (
+                                        lunchItems
+                                    )}
+                                </div>
+                            )}
+                        </Grid>
+                    </div>
+                </TabContainer>
                 <TabContainer dir={theme.direction}>
                     <div>
                         <List>

@@ -202,8 +202,7 @@ class Firebase {
     };
     //set reports to zero
     removeReports = (docID) => this.db.collection(lunches).doc(docID).update({
-        reports: [],
-        reportCount: 0
+        reportCount: 0 //reports NOT to zero because users never can report a lunch multiple times
     });
     //create interest
     addInterest = (title, desc) => this.db.collection(interests).doc().set({
