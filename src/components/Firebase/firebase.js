@@ -208,7 +208,7 @@ class Firebase {
     //create interest
     addInterest = (title, desc) => this.db.collection(interests).doc().set({
         title: title,
-        desc: desc
+        description: desc
     });
     //delete interest
     deleteInterest = (id) => this.db.collection(interests).doc(id).delete();

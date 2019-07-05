@@ -13,6 +13,11 @@ import {
     Tab,
     Tabs,
     TextField,
+    List,
+    ListItem,
+    ListItemSecondaryAction,
+    ListItemText,
+    IconButton,
     Typography, Paper, CircularProgress
 } from "@material-ui/core";
 import PropTypes from 'prop-types';
@@ -20,6 +25,8 @@ import SwipeableViews from 'react-swipeable-views';
 import {withSnackbar} from "notistack";
 import useTheme from "@material-ui/core/styles/useTheme";
 import BanHammerIcon from "@material-ui/icons/Gavel"
+import DeleteIcon from "@material-ui/icons/Delete"
+import AddIcon from "@material-ui/icons/Add"
 
 function TabContainer({ children, dir }) {
     return (
@@ -63,15 +70,80 @@ const Admin = (props) => {
     const {firebase} = props;
     const [email, setEmail] = useState('');
     const [delDialogOpen, setDialogOpen] = useState(false);
+    const [createDialogOpen, setCreateOpen] = useState(false);
+
     const [value, setValue] = React.useState(0);
     const [loading, setLoading] = React.useState(false);
     const [deleteDisabled, setDeleteDisabled] = React.useState(true);
+    const [reportedLunches, setReportedLunches] = React.useState([]);
+    const [interests, setInterests] = React.useState([]);
+    const [title, setTitle] = React.useState("");
+    const [desc, setDesc] = React.useState("");
 
     useEffect(() => {
         setDeleteDisabled(
             0===email.length //email not empty
         );
     });
+
+    async function fetchInterests() {
+        let newInterests = [];
+        const querySnapshot = await firebase.interests();
+        querySnapshot.forEach((doc) => {
+            console.log("interest: ", doc.data());
+            const interest = doc.data();
+            interest.id = doc.id;
+            newInterests.push(interest);
+        });
+        setInterests(newInterests);
+    }
+
+    function onDeleteInterest(id) {
+        console.log("Deleting item with id: ", id);
+        //TODO: delete ALL instances where interest is present???
+        firebase.deleteInterest(id).then(function () {
+            props.enqueueSnackbar('Interest deleted!', {
+                variant: 'success',
+            });
+            fetchInterests();
+        }).catch(function (err) {
+            console.error("Error deleting interest",err);
+            props.enqueueSnackbar('Something went wrong :(', {
+                variant: 'error',
+            });
+        })
+    }
+
+    const interestItems = interests.map((interest, index) => {
+        const {title, description, id} = interest;
+        return (
+            <ListItem key={index}>
+                <ListItemText
+                    primary={title}
+                    secondary={description}
+                />
+                <ListItemSecondaryAction>
+                    <IconButton onClick={() => onDeleteInterest(id)} edge="end" aria-label="Delete">
+                        <DeleteIcon />
+                    </IconButton>
+                </ListItemSecondaryAction>
+            </ListItem>
+        );
+    });
+
+    async function fetchReportedLunches() {
+        let reportedLunches = [];
+        const snapshot = await firebase.getReportedLunches();
+        snapshot.forEach((doc) => {
+            reportedLunches.push(doc.data());
+        });
+        setReportedLunches(reportedLunches);
+    }
+
+    useEffect(()=>{
+        fetchInterests();
+        fetchReportedLunches();
+    },[]);
 
     function handleChange(event, newValue) {
         setValue(newValue);
@@ -111,6 +183,33 @@ const Admin = (props) => {
         setDialogOpen(false)
     }
 
+    function addInterest() {
+        setCreateOpen(true);
+    }
+
+    function createInterest() {
+        setLoading(true);
+        firebase.addInterest(title,desc).then(function () {
+            setLoading(false);
+            props.enqueueSnackbar('Interest created!', {
+                variant: 'success',
+            });
+            fetchInterests();
+            setCreateOpen(false);
+        }).catch(function (err) {
+            setLoading(false);
+            console.error("Error creating interest",err);
+            props.enqueueSnackbar('Something went wrong :(', {
+                variant: 'error',
+            });
+            setCreateOpen(false);
+        });
+    }
+
+    function handleCreateClose() {
+        setCreateOpen(false);
+    }
+
     return (
         <div className={classes.root}>
             <CssBaseline/>
@@ -123,19 +222,28 @@ const Admin = (props) => {
                         textColor="primary"
                         variant="fullWidth"
                     >
-                        <Tab label="Reported Lunches" />
-                        <Tab label="Interests" />
-                        <Tab label="Delete User" />
+                        <Tab value={0} label="Reported Lunches" />
+                        <Tab value={1} label="Interests" />
+                        <Tab value={2} label="Delete User" />
                     </Tabs>
                 </AppBar>
             </Paper>
             <SwipeableViews
                 axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
                 index={value}
-                onChangeIndex={handleChangeIndex}
-            >
+                onChangeIndex={handleChangeIndex}>
                 <TabContainer dir={theme.direction}></TabContainer>
-                <TabContainer dir={theme.direction}>Interests</TabContainer>
+                <TabContainer dir={theme.direction}>
+                    <div>
+                        <List>
+                            {interestItems}
+                        </List>
+                        <Button variant="contained" color='primary' onClick={addInterest}>
+                            Create lunch
+                            <AddIcon className={classes.rightIcon}/>
+                        </Button>
+                    </div>
+                </TabContainer>
                 <TabContainer dir={theme.direction}>
                     <div className={classes.deleteUserRoot}>
                         <TextField
@@ -149,7 +257,6 @@ const Admin = (props) => {
                             onChange={(e) => setEmail(e.target.value)}
                             name="email"
                             autoComplete="email"
-                            autoFocus
                         />
                         <Button
                             disabled={deleteDisabled}
@@ -168,7 +275,7 @@ const Admin = (props) => {
                 onClose={handleClose}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description">
-                <DialogTitle id="alert-dialog-title">{"Reset password"}</DialogTitle>
+                <DialogTitle id="alert-dialog-title">{"Delete user"}</DialogTitle>
                 <DialogContent>
                     {loading ? (
                         <CircularProgress/>
@@ -184,6 +291,52 @@ const Admin = (props) => {
                     </Button>
                     <Button onClick={deleteUser} color="primary" autoFocus>
                         Yup
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={createDialogOpen}
+                onClose={handleCreateClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title">{"Create interest"}</DialogTitle>
+                <DialogContent>
+                    {loading ? (
+                        <CircularProgress/>
+                    ) : (
+                        <div>
+                            <TextField
+                                autoFocus
+                                margin="dense"
+                                id="title"
+                                required
+                                onChange={(e) => {
+                                    setTitle(e.target.value);
+                                }}
+                                value={title}
+                                label="Title"
+                                type="text"
+                                fullWidth
+                            />
+                            <TextField
+                                autoFocus
+                                margin="dense"
+                                id="desc"
+                                required
+                                onChange={(e) => {
+                                    setDesc(e.target.value);
+                                }}
+                                value={desc}
+                                label="Description"
+                                type="text"
+                                fullWidth
+                            />
+                        </div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={createInterest} color="primary" autoFocus>
+                        Create
                     </Button>
                 </DialogActions>
             </Dialog>
