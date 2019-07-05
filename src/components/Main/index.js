@@ -177,7 +177,6 @@ const LunchesGrid = (props) => {
         if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
         }
-        //TODO: save profile on close
         setDrawerOpen(open);
     };
 

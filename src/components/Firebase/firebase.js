@@ -212,6 +212,15 @@ class Firebase {
     });
     //delete interest
     deleteInterest = (id) => this.db.collection(interests).doc(id).delete();
+    //report lunch
+    reportLunch = (lunchID) => {
+        const uid = this.auth.currentUser.uid;
+        return this.db.collection(lunches).doc(lunchID).update({
+        reportCount: increment,
+        reports: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+    };
+    getReportedLunches = () => this.db.collection(lunches).where("reportCount",">",0).get();
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
