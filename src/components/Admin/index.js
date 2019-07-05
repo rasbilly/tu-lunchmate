@@ -316,7 +316,7 @@ const Admin = (props) => {
                             {interestItems}
                         </List>
                         <Button variant="contained" color='primary' onClick={addInterest}>
-                            Create lunch
+                            Create interest
                             <AddIcon className={classes.rightIcon}/>
                         </Button>
                     </div>
