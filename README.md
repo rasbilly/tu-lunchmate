@@ -1,14 +1,14 @@
 # Lunchmate (TUB)
 
-Online Applikation zum finden hungriger Kommilitonen zum gemeinsamen Mensen.
+Online app for finding fellow hungry students for going to lunch together.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Copy `.env` file to root folder
+## Getting started
+
+ Copy `.env` file to root folder
 
 Get the file from the slack channel and paste it here.
-
-## Set up Firebase
 
 Run
 
@@ -18,71 +18,44 @@ and
 
 ```firebase login```
 
-Now you're good to go to start the React App
+Now you're good to go to start the React App with ```npm start```
+or just build the app with ```npm run build```
 
-## Available Scripts
+### Prerequisites
 
-In the project directory, you can run:
+What things you need to install the software and how to install them
 
-### `npm start`
+```
+- Node package manager with all firebase tools installed (see above)
+- a browser
+```
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Built With
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+* [Create-react-app](https://github.com/facebook/create-react-app) - The web framework used
+* [npm](https://www.npmjs.com/) - Dependency Management
+* [Material-UI](https://rometools.github.io/rome/) - React components
+* [react-image-crop](https://github.com/DominicTobias/react-image-crop) - Image cropping library
+* [Firebase](https://github.com/firebase/) - Backend and various scalable features
+* [notistack](https://github.com/iamhosseindhv/notistack) - Snackbar notification management
 
-### `npm test`
+## Authors
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* **Tobias Dunker** - *Frontend* - [Github](https://github.com/rasbilly)
+* **Elisa Marku** - *Scrum master & Design* - [Github](https://github.com/elisamarku)
+* **Eduard Uffelman** - *Backend* - [Github](https://github.com/Schmedu)
+* **Denis Koljada** - *Backend & Infrastructure manager* - [Github](https://github.com/justdeko)
+* **Rudolf Sotnikow** - *QA* - [Github](https://github.com/rudolfsot)
+* **Jessika Wölck** - *Frontend* - [Github](https://github.com/nevihu)
+* **Konstantin Walter** - *Design & Product owner* - [Github](https://github.com/knstntnwltr)
+* **Fynn Roberts** - *Frontend* - [Github](https://github.com/robertsfynn)
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## License
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+MIT, just go read that. We're too lazy for a license.md
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Other
 
-### `npm run eject`
+*This was made in the context of a student project in the course "scalable systems" which you can attend at Technical University of Berlin*
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
