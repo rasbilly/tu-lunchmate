@@ -187,6 +187,27 @@ class Firebase {
     //Get user profile picture url
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
+
+    //filter
+    async filter(values) {
+        let query = this.db.collection('lunches')
+
+        if(values.maxMembers) {
+            query = query.where('maxMembers', '==', values.maxMembers)
+        }
+
+        if(values.clickedInterests.length > 0) {
+            query= query.where('interests', 'array-contains', values.clickedInterests[0])
+        }
+
+        if(values.startDate) {
+            query= query.where('startTimeStamp', '>=' , values.startDate)
+            .where('startTimeStamp', '<=' , values.endDate)
+        }
+        const lunches = await query.get()
+    
+        return lunches;
+    }
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
@@ -208,6 +229,8 @@ function rankAndSort(interests, lunches) {
     lunches.sort((a, b) => (a.similarity > b.similarity) ? -1 : 1);
     return lunches;
 }
+
+
 
 function filterByUserCount(min, max, lunches) {
     const newList = [];
