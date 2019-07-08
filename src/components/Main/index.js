@@ -399,7 +399,7 @@ const LunchesGrid = (props) => {
       .createLunch(
         title,
         desc,
-        clickedInterests.map((interest) => interest.title),
+        clickedInterests,
         startDate,
         endDate,
         maxMembers,
