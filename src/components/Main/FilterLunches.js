@@ -30,11 +30,14 @@ const useStyles = makeStyles((theme) => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
+  button: {
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 function FilterLunches({ firebase, setlunches }) {
   const classes = useStyles();
-  
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const [anchorEl3, setAnchorEl3] = React.useState(null);
@@ -74,8 +77,10 @@ function FilterLunches({ firebase, setlunches }) {
 
   function handleClick3(event) {
     setAnchorEl3(event.currentTarget);
-    setStartDate(new Date());
-    setEndDate(new Date());
+    if (!startDate) {
+      setStartDate(new Date());
+      setEndDate(new Date());
+    }
   }
 
   function handleClose3() {
@@ -84,16 +89,35 @@ function FilterLunches({ firebase, setlunches }) {
 
   function handleAmountSubmit(e) {
     e.preventDefault();
-    console.log(values);
+
     firebase
       .filter({ ...values, clickedInterests, startDate, endDate })
       .then((querySnapshot) => {
         let filteredLunches = [];
+        let uid = firebase.auth.currentUser.uid;
+
         querySnapshot.forEach((doc) => {
-          filteredLunches.push(doc.data());
+          const { owner, maxMembers, memberCount, interests } = doc.data();
+          const matchesInterests = clickedInterests.every((clickedInterest) =>
+            interests.includes(clickedInterest),
+          );
+
+          if (owner !== uid && memberCount < maxMembers && matchesInterests) {
+            filteredLunches.push(doc.data());
+          }
         });
         setlunches(filteredLunches);
       });
+  }
+
+  function removeFilter(e) {
+    firebase.getFreeLunches().then((querySnapshot) => {
+      setClickedInterests([]);
+      setStartDate(null);
+      setEndDate(null);
+      setValues({ maxMembers: '' });
+      handleAmountSubmit(e);
+    });
   }
 
   return (
@@ -106,6 +130,7 @@ function FilterLunches({ firebase, setlunches }) {
           aria-controls="simple-menu"
           variant="contained"
           color="primary"
+          className={classes.button}
           aria-haspopup="true"
           style={{ marginRight: 16 }}
           onClick={handleClick}
@@ -142,6 +167,7 @@ function FilterLunches({ firebase, setlunches }) {
               onClick={handleAmountSubmit}
               color="primary"
               variant="contained"
+              className={classes.root}
             >
               Save
             </Button>
@@ -152,6 +178,7 @@ function FilterLunches({ firebase, setlunches }) {
           variant="contained"
           style={{ marginRight: 16 }}
           color="primary"
+          className={classes.button}
           aria-haspopup="true"
           onClick={handleClick2}
         >
@@ -180,6 +207,7 @@ function FilterLunches({ firebase, setlunches }) {
         </Menu>
         <Button
           aria-controls="simple-menu2"
+          className={classes.button}
           variant="contained"
           style={{ marginRight: 16 }}
           color="primary"
@@ -198,14 +226,14 @@ function FilterLunches({ firebase, setlunches }) {
           <form className={classes.root} autoComplete="off">
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <DateTimePicker
-                label="Start time"
+                label="From"
                 onChange={handleStartTimeChange}
                 value={startDate}
                 ampm={false}
                 margin="dense"
               />
               <TimePicker
-                label="Lunch end time"
+                label="Till"
                 onChange={handleEndTimeChange}
                 value={endDate}
                 ampm={false}
@@ -221,6 +249,9 @@ function FilterLunches({ firebase, setlunches }) {
             </Button>
           </form>
         </Menu>
+        <Button onClick={removeFilter} className={classes.button}>
+          Remove Filters
+        </Button>
       </div>
     </div>
   );

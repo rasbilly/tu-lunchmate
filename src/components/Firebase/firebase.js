@@ -196,10 +196,6 @@ class Firebase {
             query = query.where('maxMembers', '==', values.maxMembers)
         }
 
-        if(values.clickedInterests.length > 0) {
-            query= query.where('interests', 'array-contains', values.clickedInterests[0])
-        }
-
         if(values.startDate) {
             query= query.where('startTimeStamp', '>=' , values.startDate)
             .where('startTimeStamp', '<=' , values.endDate)
