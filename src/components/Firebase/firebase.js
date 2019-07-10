@@ -194,7 +194,7 @@ class Firebase {
 
     //admin related functionality
     deleteUserByEmail = (email) => {
-        const deleteWithEmail = this.functions.httpsCallable('registerUserToTopic');
+        const deleteWithEmail = this.functions.httpsCallable('deleteUserByEmail');
         return deleteWithEmail({
             uid : this.auth.currentUser.uid,
             email : email
