@@ -17,6 +17,7 @@ import {
   Divider,
   Dialog,
   DialogActions,
+  DialogContentText,
   DialogTitle,
   DialogContent,
   TextField,
@@ -24,10 +25,10 @@ import {
   MenuItem,
   InputLabel,
   Table,
-  Avatar,
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ReportIcon from '@material-ui/icons/ReportProblem';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   DateTimePicker,
@@ -44,7 +45,6 @@ import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
 import { AccountCircle } from '@material-ui/icons';
 import FilterLunches from './FilterLunches';
-import LunchItem from './LunchItem';
 
 const authenticated = (authUser) => !!authUser;
 
@@ -116,6 +116,19 @@ const useStyles = makeStyles((theme) => ({
   drawer: {
     background: '#313131',
   },
+  hidden: {
+    display: 'none',
+    color: '#db4444',
+    float: 'right',
+  },
+  report: {
+    float: 'right',
+  },
+  inline: {
+    '&:hover $hidden': {
+      display: 'inline-block',
+    },
+  },
 }));
 
 const LunchesGrid = (props) => {
@@ -125,7 +138,6 @@ const LunchesGrid = (props) => {
   const [createLunchOpen, setCreateLunchOpen] = useState(false);
   const [ownExpanded, setOwnExpanded] = useState(false);
   const [joinedExpanded, setJoinedExpanded] = useState(false);
-  const [memberObj, setMemberObj] = useState(null);
 
   //create lunch attributes
   const [startDate, setStartDate] = useState(new Date());
@@ -147,7 +159,6 @@ const LunchesGrid = (props) => {
       );
       sortedSnapshot.forEach((doc) => {
         console.log(doc);
-
         if (
           !doc.members.includes(firebase.auth.currentUser.uid) &&
           !(doc.owner == firebase.auth.currentUser.uid)
@@ -202,7 +213,7 @@ const LunchesGrid = (props) => {
     showLunches = (
       <Card>
         <Typography variant="h5" style={{ textAlign: 'center' }}>
-          <small>You have created </small>
+          <small>You have created</small>
           {count}
           <small> Lunch(es)</small>
         </Typography>
@@ -259,7 +270,7 @@ const LunchesGrid = (props) => {
       return (
         <Card>
           <Typography variant="h5" style={{ textAlign: 'center' }}>
-            <small>You have joined </small>
+            <small>You have joined</small>
             {num}
             <small> Lunch(es)</small>
           </Typography>
@@ -294,6 +305,8 @@ const LunchesGrid = (props) => {
     setJoinedExpanded(!joinedExpanded);
   }
 
+  const [openReport, setOpenReport] = React.useState(false);
+  const [activeId, setActiveId] = React.useState('');
   const lunchItems = lunches.map((lunch, index) => {
     const {
       description,
@@ -305,11 +318,8 @@ const LunchesGrid = (props) => {
       memberCount,
       maxMembers,
       id,
-      members,
-      owner,
     } = lunch;
 
-    const allMembers = [...members, owner];
     const startTime = startTimeStamp
       .toDate()
       .toLocaleTimeString()
@@ -336,21 +346,97 @@ const LunchesGrid = (props) => {
     ));
 
     return (
-      <LunchItem
-        members={allMembers}
-        id={id}
-        index={index}
-        title={title}
-        description={description}
-        chips={chips}
-        mensa={mensa}
-        date={date}
-        startTime={startTime}
-        endTime={endTime}
-        memberCount={memberCount}
-        maxMembers={maxMembers}
-        onJoinLunch={onJoinLunch}
-      />
+      // The grid breakpoints are for responsive Design, DO NOT CHANGE
+      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
+        <Card>
+          {/* No style needed, spacing of grid handles everything! */}
+          <CardContent>
+            <div className={classes.inline}>
+              <ReportIcon
+                className={classes.report}
+                focusable="true"
+                onClick={() => {
+                  setOpenReport(true);
+                  setActiveId(lunch);
+                }}
+              />
+              <span className={classes.hidden}>Report</span>
+            </div>
+            <Typography gutterBottom variant="h5" component="h2">
+              {title}
+            </Typography>
+            <Typography color="textSecondary" component="p">
+              {description}
+            </Typography>
+            <div>{chips}</div>
+            <br />
+            <Divider component="div" />
+            <br />
+            <Table>
+              <tbody>
+                <tr>
+                  <td className={classes.column}>Mensa</td>
+                  <td>{mensa}</td>
+                </tr>
+                <tr>
+                  <td className={classes.column}>Date</td>
+                  <td>{date}</td>
+                </tr>
+                <tr>
+                  <td className={classes.column}>Time</td>
+                  <td>
+                    {startTime} - {endTime}
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
+            <br />
+            <Button
+              variant="outlined"
+              className={classes.button}
+              size="small"
+              style={{
+                color: '#DB4444',
+                borderColor: '#DB4444',
+                marginBottom: '-8px',
+              }}
+              href="#"
+              onClick={() => onJoinLunch(id)}
+            >
+              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
+            </Button>
+          </CardContent>
+        </Card>
+        <Dialog
+          open={openReport}
+          onClose={handleCloseReport}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          fullWidth={true}
+          maxWidth="sm"
+        >
+          <DialogTitle id="alert-dialog-title">{'Are you sure?'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Report: {activeId.title}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseReport} color="primary">
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                onReportLunch(activeId.id);
+              }}
+              color="primary"
+              autoFocus
+            >
+              Report
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Grid>
     );
   });
 
@@ -392,6 +478,27 @@ const LunchesGrid = (props) => {
         setUpdateLunches(!updateLunches);
       })
       .catch();
+  }
+
+  function handleCloseReport() {
+    setOpenReport(false);
+  }
+
+  function onReportLunch(lunchId) {
+    const props1 = props;
+    handleCloseReport();
+    firebase
+      .reportLunch(lunchId)
+      .then(function() {
+        props1.enqueueSnackbar('Lunch reported!', {
+          variant: 'info',
+        });
+      })
+      .catch(function() {
+        props1.enqueueSnackbar('Lunch can NOT reported!', {
+          variant: 'error',
+        });
+      });
   }
 
   function handleCloseCreateLunch() {
