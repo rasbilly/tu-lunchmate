@@ -15,6 +15,7 @@ const config = {
 
 const lunches = "lunches";
 const users = "users";
+const interests = "interests";
 const increment = firebase.firestore.FieldValue.increment(1);
 const decrement = firebase.firestore.FieldValue.increment(-1);
 
@@ -26,6 +27,7 @@ class Firebase {
     this.auth = app.auth();
     this.db = app.firestore();
     this.storage = app.storage();
+    this.functions = app.functions();
   }
 
       //Auth functions
@@ -59,7 +61,7 @@ class Firebase {
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
-    interests = () => this.db.collection("interests").get();
+    interests = () => this.db.collection(interests).get();
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
@@ -98,6 +100,8 @@ class Firebase {
             memberCount: 1,
             members: [],
             owner: uid,
+            reportCount: 0,
+            reports : [],
             mensa: mensa
         });
     };
@@ -188,6 +192,34 @@ class Firebase {
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 
+    //admin related functionality
+    deleteUserByEmail = (email) => {
+        const deleteWithEmail = this.functions.httpsCallable('deleteUserByEmail');
+        return deleteWithEmail({
+            uid : this.auth.currentUser.uid,
+            email : email
+        })
+    };
+    //set reports to zero
+    removeReports = (docID) => this.db.collection(lunches).doc(docID).update({
+        reportCount: 0 //reports NOT to zero because users never can report a lunch multiple times
+    });
+    //create interest
+    addInterest = (title, desc) => this.db.collection(interests).doc().set({
+        title: title,
+        description: desc
+    });
+    //delete interest
+    deleteInterest = (id) => this.db.collection(interests).doc(id).delete();
+    //report lunch
+    reportLunch = (lunchID) => {
+        const uid = this.auth.currentUser.uid;
+        return this.db.collection(lunches).doc(lunchID).update({
+        reportCount: increment,
+        reports: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+    };
+    getReportedLunches = () => this.db.collection(lunches).where("reportCount",">",0).get();
     //filter
     async filter(values) {
         let query = this.db.collection('lunches')
