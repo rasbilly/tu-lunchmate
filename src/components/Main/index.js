@@ -42,6 +42,7 @@ import JoinedLunches from './JoinedLunches';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
 import {AccountCircle} from "@material-ui/icons";
+import FilterLunches from './FilterLunches'
 
 const authenticated = (authUser) => !!authUser;
 
@@ -399,7 +400,7 @@ const LunchesGrid = (props) => {
       .createLunch(
         title,
         desc,
-        clickedInterests.map((interest) => interest.title),
+        clickedInterests,
         startDate,
         endDate,
         maxMembers,
@@ -450,6 +451,7 @@ const LunchesGrid = (props) => {
               </Typography>
             </Grid>
           </Grid>
+          
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               {showLunches}
@@ -465,6 +467,7 @@ const LunchesGrid = (props) => {
           >
             Available Lunches
           </Typography>
+          <FilterLunches setlunches={setlunches} />
           <Grid container spacing={3}>
             {lunchItems ? (
               lunchItems
