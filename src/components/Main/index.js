@@ -23,7 +23,7 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  Table,
+  Table, Avatar,
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -123,6 +123,7 @@ const LunchesGrid = (props) => {
   const [createLunchOpen, setCreateLunchOpen] = useState(false);
   const [ownExpanded, setOwnExpanded] = useState(false);
   const [joinedExpanded, setJoinedExpanded] = useState(false);
+  const [memberObj, setMemberObj] = useState (null);
 
   //create lunch attributes
   const [startDate, setStartDate] = useState(new Date());
@@ -135,6 +136,7 @@ const LunchesGrid = (props) => {
   const [updateLunches, setUpdateLunches] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+
   useEffect(() => {
     const fetchLunchData = async () => {
       let newLunch = [];
@@ -142,6 +144,7 @@ const LunchesGrid = (props) => {
       const sortedSnapshot = await firebase.sortLunchesByInterests(querySnapshot);
       sortedSnapshot.forEach((doc) => {
         console.log(doc);
+
         if(!doc.members.includes(firebase.auth.currentUser.uid)
             && !(doc.owner==firebase.auth.currentUser.uid)){
           newLunch.push(doc);
@@ -290,7 +293,8 @@ const LunchesGrid = (props) => {
       startTimeStamp,
       memberCount,
       maxMembers,
-      id
+      id,
+      members,
     } = lunch;
 
     const startTime = startTimeStamp
@@ -318,6 +322,13 @@ const LunchesGrid = (props) => {
       />
     ));
 
+    const member = members.forEach((mem) => {
+      firebase.userProfilePicURL(mem).then(function (doc) {
+        console.log("mem: " + doc);
+        <Avatar key={mem.id} align='right' src={doc}/>
+      })
+    })
+
     return (
       // The grid breakpoints are for responsive Design, DO NOT CHANGE
       <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
@@ -330,6 +341,7 @@ const LunchesGrid = (props) => {
             <Typography color="textSecondary" component="p">
               {description}
             </Typography>
+            <div>{member}</div>
             <div>{chips}</div>
             <br />
             <Divider component="div" />
