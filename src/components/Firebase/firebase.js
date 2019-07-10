@@ -220,6 +220,22 @@ class Firebase {
         })
     };
     getReportedLunches = () => this.db.collection(lunches).where("reportCount",">",0).get();
+    //filter
+    async filter(values) {
+        let query = this.db.collection('lunches')
+
+        if(values.maxMembers) {
+            query = query.where('maxMembers', '==', values.maxMembers)
+        }
+
+        if(values.startDate) {
+            query= query.where('startTimeStamp', '>=' , values.startDate)
+            .where('startTimeStamp', '<=' , values.endDate)
+        }
+        const lunches = await query.get()
+    
+        return lunches;
+    }
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
@@ -241,6 +257,8 @@ function rankAndSort(interests, lunches) {
     lunches.sort((a, b) => (a.similarity > b.similarity) ? -1 : 1);
     return lunches;
 }
+
+
 
 function filterByUserCount(min, max, lunches) {
     const newList = [];
