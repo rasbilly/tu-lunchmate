@@ -61,7 +61,7 @@ const UserProfile = (props) => {
               userObj.interests.map((interest) => (
                 <Chip
                   key={interest}
-                  style={{ marginRight: '0.2rem' }}
+                  style={{ marginRight: '0.2rem', marginBottom: '0.3rem' }}
                   size="small"
                   label={interest}
                   color="primary"

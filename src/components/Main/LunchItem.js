@@ -136,7 +136,6 @@ const LunchItem = ({
 
   function handleClick(id) {
     setUserID(id);
-    console.log(id);
     setIsActive(true);
   }
 
@@ -153,7 +152,6 @@ const LunchItem = ({
               {description}
             </Typography>
             <div>
-              {console.log(membersAvatars)}
               {membersAvatars.map((avatar) => {
                 return (
                   <Avatar
@@ -231,7 +229,7 @@ const LunchItem = ({
               <Button
                 color="primary"
                 variant="contained"
-                onClick={() => deleteLunch(id)}
+                onClick={() => deleteLunch(lunch.id)}
               >
                 Delete
                 <DeleteIcon className={classes.rightIcon} />
