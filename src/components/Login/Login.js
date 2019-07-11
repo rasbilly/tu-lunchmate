@@ -36,7 +36,7 @@ function SignIn(props) {
     const { firebase, history } = props;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [alertMessage, setalertMessage] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
     const classes = useStyles();
 
     const handleSubmit = (event) => {
@@ -47,7 +47,7 @@ function SignIn(props) {
                 history.push('/main');
             })
             .catch((error) => {
-                setalertMessage(error.message);
+                setAlertMessage(error.message);
             });
     };
 

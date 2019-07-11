@@ -20,7 +20,7 @@ import {
 import InterestsForm from '../Registration/InterestsForm';
 import { withSnackbar } from 'notistack';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   margin: {
     marginTop: 8,
     marginBottom: 4,

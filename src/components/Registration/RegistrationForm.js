@@ -1,5 +1,4 @@
-import React, {useEffect} from 'react';
-import { withFirebase } from '../Firebase';
+import React, {} from 'react';
 import {makeStyles, Grid, TextField, CssBaseline, Container} from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({

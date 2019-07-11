@@ -82,7 +82,7 @@ const ProfilePicForm = (props) => {
         crop.height
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       canvas.toBlob(blob => {
         if (!blob) {
           //reject(new Error('Canvas is empty'));
@@ -137,7 +137,7 @@ const ProfilePicForm = (props) => {
       setMajors(majors);
     };
     fetchData();
-  }, []);
+  }, [firebase]);
 
   const classes = useStyles();
 

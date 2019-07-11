@@ -6,7 +6,6 @@ import LandingPage from './components/landingpage.component';
 import Registration from './components/Registration/Registration';
 import Login from './components/Login/Login';
 import Profile from './components/Profile/Profile';
-import UserProfile from './components/Profile/UserProfile';
 import Admin from './components/Admin';
 import Main from './components/Main';
 import { withAuth } from './components/Session';

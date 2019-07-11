@@ -50,13 +50,13 @@ const Profile = (props) => {
             } else {
             }
         });
-    }, []);
+    }, [firebase.auth]);
 
     useEffect(() => {
         if (clickedInterests && clickedInterests.length > 0) {
             firebase.updateUserInterests(clickedInterests);
         }
-    }, [clickedInterests]);
+    }, [clickedInterests, firebase]);
 
     useEffect(()=>{
         if (userInfo != null) {
@@ -64,7 +64,7 @@ const Profile = (props) => {
                 firebase.updateUserBio(userInfo.major, userInfo.description);
             }
         }
-    }, [userInfo]);
+    }, [firebase, userInfo]);
 
     const fetchUserData = (uid) => {
         firebase.user(uid).then(function (snapshot) {
@@ -126,13 +126,11 @@ const Profile = (props) => {
                             value={userInfo && userInfo.description}
                             onChange={(e) => handleDescChange(e.target.value)}
                             className={classes.textField}
-                            InputProps={{
-                                classes: {
-                                    input: classes.textField
-                                }
-                            }}
                             inputStyle={{ textAlign: 'center' }}
                             inputProps={{
+                                classes: {
+                                    input: classes.textField
+                                },
                                 maxLength: 70,
                                 textAlign: "center"
                             }}

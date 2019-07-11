@@ -4,8 +4,6 @@ import {
   Avatar,
   Typography,
   Grid,
-  Container,
-  CssBaseline,
   Card,
   CardHeader,
   CardContent,
@@ -72,7 +70,7 @@ const UserProfile = (props) => {
         </Grid>
       </CardContent>
     </Card>
-  ); //TODO: interests as chips, proper formatting, loading icon before loading infos
+  );
 };
 
 export default withFirebase(UserProfile);

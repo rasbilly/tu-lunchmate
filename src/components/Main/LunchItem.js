@@ -95,7 +95,6 @@ const useStyles = makeStyles((theme) => ({
 
 const LunchItem = ({
   id,
-  index,
   title,
   description,
   chips,
@@ -143,7 +142,7 @@ const LunchItem = ({
 
       setMembersAvatars(allMembers);
     });
-  }, []);
+  }, [firebase, members]);
 
   function handleClick(id) {
     setUserID(id);

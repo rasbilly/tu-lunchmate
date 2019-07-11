@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withFirebase } from '../Firebase';
-import { Typography, Chip, makeStyles, Grid } from '@material-ui/core';
+import { Chip, makeStyles, Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   subtitle: {
@@ -30,7 +30,7 @@ const InterestsForm = (props) => {
       setInterests(newInterests.filter((i) => !clickedInterests.includes(i)));
     };
     fetchData();
-  }, []);
+  }, [clickedInterests, firebase]);
 
   useEffect(()=>{
     console.log("this has happened motherfucker");
@@ -38,7 +38,7 @@ const InterestsForm = (props) => {
         (element) => !clickedInterests.includes(element)
     );
     setInterests(newinterests);
-  },[clickedInterests]);
+  },[clickedInterests, interests]);
 
   const handleClick = (clickedInterest) => {
     console.log("click!");
@@ -66,7 +66,6 @@ const InterestsForm = (props) => {
         key={index}
         className={classes.chip}
         label={interest}
-        key={interest}
         clickable
         onClick={() => handleClick(interest)}
       />
@@ -79,7 +78,6 @@ const InterestsForm = (props) => {
         key={index}
         className={classes.chip}
         label={interest}
-        key={interest}
         color="primary"
         clickable
         onClick={() => handleUnClick(interest)}
