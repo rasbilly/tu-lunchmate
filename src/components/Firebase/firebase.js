@@ -16,6 +16,7 @@ const config = {
 
 const lunches = "lunches";
 const users = "users";
+const interests = "interests";
 const increment = firebase.firestore.FieldValue.increment(1);
 const decrement = firebase.firestore.FieldValue.increment(-1);
 
@@ -62,7 +63,7 @@ class Firebase {
     //Get list of majors
     majors = () => this.db.collection("majors").get();
     //Get Interests
-    interests = () => this.db.collection("interests").get();
+    interests = () => this.db.collection(interests).get();
 
     //Registration functions
     createUser = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
@@ -101,6 +102,8 @@ class Firebase {
             memberCount: 1,
             members: [],
             owner: uid,
+            reportCount: 0,
+            reports : [],
             mensa: mensa
         });
     };
@@ -187,8 +190,10 @@ class Firebase {
         });
     //Get user
     user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user
+    users = async() => await this.db.collection(users).get(); //this contains every relevant infos for a user
     //Get user profile picture url
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
+    userProfilePicsURL = (uid) => this.storage.ref('profile_pictures').getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 
     //cloud messaging pub/sub requests
@@ -206,6 +211,51 @@ class Firebase {
             token: token
         })
     };
+
+    //admin related functionality
+    deleteUserByEmail = (email) => {
+        const deleteWithEmail = this.functions.httpsCallable('deleteUserByEmail');
+        return deleteWithEmail({
+            uid : this.auth.currentUser.uid,
+            email : email
+        })
+    };
+    //set reports to zero
+    removeReports = (docID) => this.db.collection(lunches).doc(docID).update({
+        reportCount: 0 //reports NOT to zero because users never can report a lunch multiple times
+    });
+    //create interest
+    addInterest = (title, desc) => this.db.collection(interests).doc().set({
+        title: title,
+        description: desc
+    });
+    //delete interest
+    deleteInterest = (id) => this.db.collection(interests).doc(id).delete();
+    //report lunch
+    reportLunch = (lunchID) => {
+        const uid = this.auth.currentUser.uid;
+        return this.db.collection(lunches).doc(lunchID).update({
+        reportCount: increment,
+        reports: firebase.firestore.FieldValue.arrayUnion(uid)
+        })
+    };
+    getReportedLunches = () => this.db.collection(lunches).where("reportCount",">",0).get();
+    //filter
+    async filter(values) {
+        let query = this.db.collection('lunches')
+
+        if(values.maxMembers) {
+            query = query.where('maxMembers', '==', values.maxMembers)
+        }
+
+        if(values.startDate) {
+            query= query.where('startTimeStamp', '>=' , values.startDate)
+            .where('startTimeStamp', '<=' , values.endDate)
+        }
+        const lunches = await query.get()
+    
+        return lunches;
+    }
 }
 /*
 sorts lunches by own interests match: e.g. [Sports, Photography] and [Sports, Photography]
@@ -227,6 +277,8 @@ function rankAndSort(interests, lunches) {
     lunches.sort((a, b) => (a.similarity > b.similarity) ? -1 : 1);
     return lunches;
 }
+
+
 
 function filterByUserCount(min, max, lunches) {
     const newList = [];

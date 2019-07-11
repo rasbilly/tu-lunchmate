@@ -17,6 +17,7 @@ import {
   Divider,
   Dialog,
   DialogActions,
+  DialogContentText,
   DialogTitle,
   DialogContent,
   TextField,
@@ -27,6 +28,7 @@ import {
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ReportIcon from '@material-ui/icons/ReportProblem';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   DateTimePicker,
@@ -35,13 +37,15 @@ import {
 } from '@material-ui/pickers';
 import AddIcon from '@material-ui/icons/Add';
 import CreateLunch from '../CreateLunch/CreateLunch';
-import Profile from "../Profile/Profile";
+import Profile from '../Profile/Profile';
 import InterestsForm from '../Registration/InterestsForm';
 import OwnLunches from './OwnLunches';
 import JoinedLunches from './JoinedLunches';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
-import {AccountCircle} from "@material-ui/icons";
+import { AccountCircle } from '@material-ui/icons';
+import FilterLunches from './FilterLunches';
+import LunchItem from './LunchItem';
 
 const authenticated = (authUser) => !!authUser;
 
@@ -111,8 +115,21 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: 2,
   },
   drawer: {
-    background: "#313131"
-  }
+    background: '#313131',
+  },
+  hidden: {
+    display: 'none',
+    color: '#db4444',
+    float: 'right',
+  },
+  report: {
+    float: 'right',
+  },
+  inline: {
+    '&:hover $hidden': {
+      display: 'inline-block',
+    },
+  },
 }));
 
 const LunchesGrid = (props) => {
@@ -158,11 +175,17 @@ const LunchesGrid = (props) => {
     const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
-      const sortedSnapshot = await firebase.sortLunchesByInterests(querySnapshot);
+      const sortedSnapshot = await firebase.sortLunchesByInterests(
+        querySnapshot,
+      );
       sortedSnapshot.forEach((doc) => {
         console.log(doc);
-        if(!doc.members.includes(firebase.auth.currentUser.uid)
-            && !(doc.owner==firebase.auth.currentUser.uid)){
+        const uid = firebase.auth.currentUser.uid;
+        if (
+          !doc.members.includes(uid) &&
+          !(doc.owner === uid) &&
+          !doc.reports.includes(uid)
+        ) {
           newLunch.push(doc);
         }
       });
@@ -205,17 +228,22 @@ const LunchesGrid = (props) => {
     return count > 0;
   }
 
-    //onclick openProfile
-    const toggleDrawer = (open) => event => {
-        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        //TODO: save profile on close
-        setDrawerOpen(open);
-    };
+  //onclick openProfile
+  const toggleDrawer = (open) => (event) => {
+    if (
+      event &&
+      event.type === 'keydown' &&
+      (event.key === 'Tab' || event.key === 'Shift')
+    ) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
 
   let showLunches = (
-    <div className="hello">You haven't created any Lunches. See that red plus in the corner?</div>
+    <div className="hello">
+      You haven't created any Lunches. See that red plus in the corner?
+    </div>
   );
   if (countOwnLunches()) {
     showLunches = (
@@ -298,9 +326,9 @@ const LunchesGrid = (props) => {
           <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
             <CardContent>
               <JoinedLunches
-                  updateLunches={updateLunches}
-                  setUpdateLunches={setUpdateLunches}
-                  token={token}
+                updateLunches={updateLunches}
+                setUpdateLunches={setUpdateLunches}
+                token={token}
               />
             </CardContent>
           </Collapse>
@@ -315,6 +343,8 @@ const LunchesGrid = (props) => {
     setJoinedExpanded(!joinedExpanded);
   }
 
+  const [openReport, setOpenReport] = React.useState(false);
+  const [activeId, setActiveId] = React.useState('');
   const lunchItems = lunches.map((lunch, index) => {
     const {
       description,
@@ -325,8 +355,12 @@ const LunchesGrid = (props) => {
       startTimeStamp,
       memberCount,
       maxMembers,
-      id
+      id,
+      members,
+      owner,
     } = lunch;
+
+    const allMembers = [...members, owner];
 
     const startTime = startTimeStamp
       .toDate()
@@ -354,66 +388,39 @@ const LunchesGrid = (props) => {
     ));
 
     return (
-      // The grid breakpoints are for responsive Design, DO NOT CHANGE
-      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
-        <Card>
-          {/* No style needed, spacing of grid handles everything! */}
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography color="textSecondary" component="p">
-              {description}
-            </Typography>
-            <div>{chips}</div>
-            <br />
-            <Divider component="div" />
-            <br />
-            <Table>
-              <tbody>
-                <tr>
-                  <td className={classes.column}>Mensa</td>
-                  <td>{mensa}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Date</td>
-                  <td>{date}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Time</td>
-                  <td>
-                    {startTime} - {endTime}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-            <br />
-            <Button
-              variant="outlined"
-              className={classes.button}
-              size="small"
-              style={{
-                color: '#DB4444',
-                borderColor: '#DB4444',
-                marginBottom: '-8px',
-              }}
-              href="#"
-              onClick={() => onJoinLunch(id)}
-            >
-              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
-            </Button>
-          </CardContent>
-        </Card>
-      </Grid>
+      <LunchItem
+        key={id}
+        setOpenReport={setOpenReport}
+        members={allMembers}
+        setActiveId={setActiveId}
+        activeId={activeId}
+        lunch={lunch}
+        id={id}
+        index={index}
+        title={title}
+        description={description}
+        chips={chips}
+        mensa={mensa}
+        date={date}
+        startTime={startTime}
+        endTime={endTime}
+        memberCount={memberCount}
+        maxMembers={maxMembers}
+        onJoinLunch={onJoinLunch}
+        setOpenReport={setOpenReport}
+        setActiveId={setActiveId}
+        openReport={openReport}
+        activeId={activeId}
+        handleCloseReport={handleCloseReport}
+        onReportLunch={onReportLunch}
+      />
     );
   });
 
   function onJoinLunch(id) {
     const props1 = props;
     firebase
-        .joinLunch(
-            id
-        )
+        .joinLunch(id)
         .then(function() {
           props1.enqueueSnackbar('Lunch joined!', {
             variant: 'success',
@@ -436,7 +443,7 @@ const LunchesGrid = (props) => {
       .createLunch(
         title,
         desc,
-        clickedInterests.map((interest) => interest.title),
+        clickedInterests,
         startDate,
         endDate,
         maxMembers,
@@ -452,6 +459,28 @@ const LunchesGrid = (props) => {
         setUpdateLunches(!updateLunches);
       })
       .catch();
+  }
+
+  function handleCloseReport() {
+    setOpenReport(false);
+  }
+
+  function onReportLunch(lunchId) {
+    const props1 = props;
+    handleCloseReport();
+    firebase
+      .reportLunch(lunchId)
+      .then(function() {
+        props1.enqueueSnackbar('Lunch reported!', {
+          variant: 'info',
+        });
+        setUpdateLunches(true);
+      })
+      .catch(function() {
+        props1.enqueueSnackbar('Lunch can NOT reported!', {
+          variant: 'error',
+        });
+      });
   }
 
   function handleCloseCreateLunch() {
@@ -474,21 +503,27 @@ const LunchesGrid = (props) => {
           <Grid container spacing={1}>
             <Grid item xs={6}>
               <IconButton
-                  aria-label="Account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  edge="end"
-                  onClick={toggleDrawer(true)}
-                  color="inherit">
-                <AccountCircle/>
+                aria-label="Account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                edge="end"
+                onClick={toggleDrawer(true)}
+                color="inherit"
+              >
+                <AccountCircle />
               </IconButton>
             </Grid>
             <Grid item xs={6}>
-              <Typography component="h1" variant="h3" style={{ marginBottom: 16 }}>
+              <Typography
+                component="h1"
+                variant="h3"
+                style={{ marginBottom: 16 }}
+              >
                 Your Lunches
               </Typography>
             </Grid>
           </Grid>
+
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               {showLunches}
@@ -504,6 +539,7 @@ const LunchesGrid = (props) => {
           >
             Available Lunches
           </Typography>
+          <FilterLunches setlunches={setlunches} />
           <Grid container spacing={3}>
             {lunchItems ? (
               lunchItems
@@ -609,13 +645,14 @@ const LunchesGrid = (props) => {
         </DialogActions>
       </Dialog>
 
-        <SwipeableDrawer
-            open={drawerOpen}
-            classes={{ paper: classes.drawer }}
-            onClose={toggleDrawer(false)}
-            onOpen={toggleDrawer(true)}>
-            <Profile/>
-        </SwipeableDrawer>
+      <SwipeableDrawer
+        open={drawerOpen}
+        classes={{ paper: classes.drawer }}
+        onClose={toggleDrawer(false)}
+        onOpen={toggleDrawer(true)}
+      >
+        <Profile />
+      </SwipeableDrawer>
     </div>
   );
 };
