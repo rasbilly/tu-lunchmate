@@ -116,6 +116,7 @@ const OwnLunches = (props) => {
       // The grid breakpoints are for responsive Design, DO NOT CHANGE
       <>
         <LunchItem
+          key={id}
           members={members}
           id={id}
           index={index}
