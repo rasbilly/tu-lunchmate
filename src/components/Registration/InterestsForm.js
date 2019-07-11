@@ -30,7 +30,7 @@ const InterestsForm = (props) => {
       setInterests(newInterests.filter((i) => !clickedInterests.includes(i)));
     };
     fetchData();
-  }, [clickedInterests, firebase]);
+  }, []);
 
   useEffect(()=>{
     console.log("this has happened motherfucker");
@@ -38,7 +38,7 @@ const InterestsForm = (props) => {
         (element) => !clickedInterests.includes(element)
     );
     setInterests(newinterests);
-  },[clickedInterests, interests]);
+  },[clickedInterests]);
 
   const handleClick = (clickedInterest) => {
     console.log("click!");
