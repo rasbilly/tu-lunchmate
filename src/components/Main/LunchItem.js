@@ -9,14 +9,19 @@ import {
   CardActions,
   Divider,
   Dialog,
+  IconButton,
   Table,
   Avatar,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@material-ui/core';
 import { withFirebase } from '../Firebase';
-import { Link } from 'react-router-dom';
 import UserProfile from '../Profile/UserProfile';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import ReportIcon from '@material-ui/icons/ReportProblem';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -107,6 +112,12 @@ const LunchItem = ({
   updateLunch,
   lunch,
   deleteLunch,
+  setOpenReport,
+  setActiveId,
+  openReport,
+  activeId,
+  handleCloseReport,
+  onReportLunch,
 }) => {
   const classes = useStyles();
   const [membersAvatars, setMembersAvatars] = useState([]);
@@ -140,11 +151,23 @@ const LunchItem = ({
   }
 
   return (
-    <>
-      <Grid key={index} item xs={12} sm={6} md={6} lg={6} xl={6}>
-        <Card key={index}>
-          {/* No style needed, spacing of grid handles everything! */}
+    <React.Fragment>
+      <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+        <Card>
           <CardContent>
+            {setOpenReport ? (
+              <IconButton
+                aria-label="Delete"
+                color="primary"
+                onClick={() => {
+                  setOpenReport(true);
+                  setActiveId(lunch);
+                }}
+                style={{ float: 'right ' }}
+              >
+                <ReportIcon />
+              </IconButton>
+            ) : null}
             <Typography gutterBottom variant="h5" component="h2">
               {title}
             </Typography>
@@ -163,6 +186,7 @@ const LunchItem = ({
                     }}
                     align="right"
                     src={avatar.photoURL}
+                    key={avatar.id}
                   />
                 );
               })}
@@ -238,10 +262,41 @@ const LunchItem = ({
           ) : null}
         </Card>
       </Grid>
+      {setOpenReport ? (
+        <Dialog
+          open={openReport}
+          onClose={handleCloseReport}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          fullWidth={true}
+          maxWidth="sm"
+        >
+          <DialogTitle id="alert-dialog-title">{'Are you sure?'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Report: {activeId.title}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseReport} color="primary">
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                onReportLunch(activeId.id);
+              }}
+              color="primary"
+              autoFocus
+            >
+              Report
+            </Button>
+          </DialogActions>
+        </Dialog>
+      ) : null}
       <Dialog open={isActive} onClose={() => setIsActive(false)}>
         <UserProfile uid={userID} />
       </Dialog>
-    </>
+    </React.Fragment>
   );
 };
 

@@ -68,7 +68,7 @@ const JoinedLunches = (props) => {
       endTimeStamp,
       startTimeStamp,
       members,
-      owner
+      owner,
     } = lunch.data;
 
     const allMembers = [...members, owner];
@@ -99,6 +99,7 @@ const JoinedLunches = (props) => {
 
     return (
       <LunchItem
+        key={lunch.id}
         id={lunch.id}
         index={index}
         title={title}

@@ -17,6 +17,7 @@ import {
   Divider,
   Dialog,
   DialogActions,
+  DialogContentText,
   DialogTitle,
   DialogContent,
   TextField,
@@ -24,10 +25,10 @@ import {
   MenuItem,
   InputLabel,
   Table,
-  Avatar,
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ReportIcon from '@material-ui/icons/ReportProblem';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   DateTimePicker,
@@ -116,6 +117,19 @@ const useStyles = makeStyles((theme) => ({
   drawer: {
     background: '#313131',
   },
+  hidden: {
+    display: 'none',
+    color: '#db4444',
+    float: 'right',
+  },
+  report: {
+    float: 'right',
+  },
+  inline: {
+    '&:hover $hidden': {
+      display: 'inline-block',
+    },
+  },
 }));
 
 const LunchesGrid = (props) => {
@@ -125,7 +139,6 @@ const LunchesGrid = (props) => {
   const [createLunchOpen, setCreateLunchOpen] = useState(false);
   const [ownExpanded, setOwnExpanded] = useState(false);
   const [joinedExpanded, setJoinedExpanded] = useState(false);
-  const [memberObj, setMemberObj] = useState(null);
 
   //create lunch attributes
   const [startDate, setStartDate] = useState(new Date());
@@ -147,10 +160,11 @@ const LunchesGrid = (props) => {
       );
       sortedSnapshot.forEach((doc) => {
         console.log(doc);
-
+        const uid = firebase.auth.currentUser.uid;
         if (
-          !doc.members.includes(firebase.auth.currentUser.uid) &&
-          !(doc.owner == firebase.auth.currentUser.uid)
+          !doc.members.includes(uid) &&
+          !(doc.owner === uid) &&
+          !doc.reports.includes(uid)
         ) {
           newLunch.push(doc);
         }
@@ -294,6 +308,8 @@ const LunchesGrid = (props) => {
     setJoinedExpanded(!joinedExpanded);
   }
 
+  const [openReport, setOpenReport] = React.useState(false);
+  const [activeId, setActiveId] = React.useState('');
   const lunchItems = lunches.map((lunch, index) => {
     const {
       description,
@@ -310,6 +326,7 @@ const LunchesGrid = (props) => {
     } = lunch;
 
     const allMembers = [...members, owner];
+
     const startTime = startTimeStamp
       .toDate()
       .toLocaleTimeString()
@@ -337,7 +354,12 @@ const LunchesGrid = (props) => {
 
     return (
       <LunchItem
+        key={id}
+        setOpenReport={setOpenReport}
         members={allMembers}
+        setActiveId={setActiveId}
+        activeId={activeId}
+        lunch={lunch}
         id={id}
         index={index}
         title={title}
@@ -350,6 +372,12 @@ const LunchesGrid = (props) => {
         memberCount={memberCount}
         maxMembers={maxMembers}
         onJoinLunch={onJoinLunch}
+        setOpenReport={setOpenReport}
+        setActiveId={setActiveId}
+        openReport={openReport}
+        activeId={activeId}
+        handleCloseReport={handleCloseReport}
+        onReportLunch={onReportLunch}
       />
     );
   });
@@ -392,6 +420,28 @@ const LunchesGrid = (props) => {
         setUpdateLunches(!updateLunches);
       })
       .catch();
+  }
+
+  function handleCloseReport() {
+    setOpenReport(false);
+  }
+
+  function onReportLunch(lunchId) {
+    const props1 = props;
+    handleCloseReport();
+    firebase
+      .reportLunch(lunchId)
+      .then(function() {
+        props1.enqueueSnackbar('Lunch reported!', {
+          variant: 'info',
+        });
+        setUpdateLunches(true);
+      })
+      .catch(function() {
+        props1.enqueueSnackbar('Lunch can NOT reported!', {
+          variant: 'error',
+        });
+      });
   }
 
   function handleCloseCreateLunch() {
