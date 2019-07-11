@@ -97,13 +97,27 @@ function FilterLunches({ firebase, setlunches }) {
         let uid = firebase.auth.currentUser.uid;
 
         querySnapshot.forEach((doc) => {
-          const { owner, maxMembers, memberCount, interests } = doc.data();
+          const {
+            owner,
+            maxMembers,
+            memberCount,
+            interests,
+            reports,
+            members,
+          } = doc.data();
           const matchesInterests = clickedInterests.every((clickedInterest) =>
             interests.includes(clickedInterest),
           );
 
-          if (owner !== uid && memberCount < maxMembers && matchesInterests) {
-            filteredLunches.push(doc.data());
+          if (
+            owner !== uid &&
+            memberCount < maxMembers &&
+            matchesInterests &&
+            !reports.includes(uid) &&
+            !members.includes(uid)
+          ) {
+            const id = doc.id;
+            filteredLunches.push({ ...doc.data(), id });
           }
         });
         setlunches(filteredLunches);
