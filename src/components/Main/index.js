@@ -306,8 +306,10 @@ const LunchesGrid = (props) => {
       maxMembers,
       id,
       members,
+      owner,
     } = lunch;
 
+    const allMembers = [...members, owner];
     const startTime = startTimeStamp
       .toDate()
       .toLocaleTimeString()
@@ -335,7 +337,7 @@ const LunchesGrid = (props) => {
 
     return (
       <LunchItem
-        members={members}
+        members={allMembers}
         id={id}
         index={index}
         title={title}
