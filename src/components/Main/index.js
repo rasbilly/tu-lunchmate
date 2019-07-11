@@ -449,7 +449,8 @@ const LunchesGrid = (props) => {
         maxMembers,
         mensa,
       )
-      .then(function(docref) {
+      .then(docref => {
+        console.log("document ref:",docref);
         //get notifications for this lunch
         firebase.subscribeToLunch(docref.id, token).catch((e)=>console.log(e));
         props1.enqueueSnackbar('Lunch created!', {

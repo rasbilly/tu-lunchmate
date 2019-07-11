@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Admin = (props) => {
-    const {firebase} = props;
+    const {firebase, history} = props;
     const [email, setEmail] = useState('');
     const [delDialogOpen, setDialogOpen] = useState(false);
     const [createDialogOpen, setCreateOpen] = useState(false);
@@ -201,7 +201,18 @@ const Admin = (props) => {
         setReportedLunches(reportedLunches);
     }
 
+    function checkUser() {
+        firebase.auth.onAuthStateChanged(function (user) {
+            firebase.user(user.uid).then(function (user) {
+                if(!user.isAdmin) {
+                    history.push("/main");
+                }
+            })
+        });
+    }
+
     useEffect(()=>{
+        checkUser();
         fetchInterests();
         fetchReportedLunches();
     },[]);

@@ -97,6 +97,8 @@ const Registration = (props) => {
                         firebase.updateProfilePic(url).then(function () { //sets the profile in the auth db
                             console.log("success");
                             setFinished(true);
+                        }).catch(function (e) {
+                            console.error("error updating profilepic",e)
                         })
                     }).catch(function (error) {
                         console.error("error getting profileurl:",error);
