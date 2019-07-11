@@ -15,6 +15,7 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import UpdateLunchForm from './UpdateLunchForm';
+import LunchItem from './LunchItem';
 
 const useStyles = makeStyles((theme) => ({
   chip: {
@@ -82,6 +83,8 @@ const OwnLunches = (props) => {
       interests,
       endTimeStamp,
       startTimeStamp,
+      members,
+      id,
     } = lunch.data;
 
     const startTime = startTimeStamp
@@ -111,58 +114,22 @@ const OwnLunches = (props) => {
 
     return (
       // The grid breakpoints are for responsive Design, DO NOT CHANGE
-      <Grid key={index} item xs={12} sm={6} lg={4} xl={3}>
-        <Card>
-          {/* No style needed, spacing of grid handles everything! */}
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography color="textSecondary" component="p">
-              {description}
-            </Typography>
-            <div>{chips}</div>
-            <br />
-            <Divider component="div" />
-            <br />
-            <Table>
-              <tbody>
-                <tr>
-                  <td className={classes.column}>Mensa</td>
-                  <td>{mensa}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Date</td>
-                  <td>{date}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Time</td>
-                  <td>
-                    {startTime} - {endTime}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </CardContent>
-          <CardActions>
-            <Button
-              className={classes.editButton}
-              variant="contained"
-              onClick={() => updateLunch(lunch)}
-            >
-              Edit
-              <EditIcon className={classes.rightIcon} />
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={() => deleteLunch(lunch.id)}
-            >
-              Delete
-              <DeleteIcon className={classes.rightIcon} />
-            </Button>
-          </CardActions>
-        </Card>
+      <>
+        <LunchItem
+          members={members}
+          id={id}
+          index={index}
+          title={title}
+          description={description}
+          chips={chips}
+          mensa={mensa}
+          date={date}
+          startTime={startTime}
+          endTime={endTime}
+          updateLunch={updateLunch}
+          deleteLunch={deleteLunch}
+          lunch={lunch}
+        />
         <UpdateLunchForm
           dialogTitle="Edit Lunch"
           active={activeModal}
@@ -173,7 +140,7 @@ const OwnLunches = (props) => {
           setHasUpdated={setHasUpdated}
           setUpdateLunches={setUpdateLunches}
         />
-      </Grid>
+      </>
     );
   });
 

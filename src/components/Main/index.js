@@ -24,6 +24,7 @@ import {
   MenuItem,
   InputLabel,
   Table,
+  Avatar,
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -35,14 +36,15 @@ import {
 } from '@material-ui/pickers';
 import AddIcon from '@material-ui/icons/Add';
 import CreateLunch from '../CreateLunch/CreateLunch';
-import Profile from "../Profile/Profile";
+import Profile from '../Profile/Profile';
 import InterestsForm from '../Registration/InterestsForm';
 import OwnLunches from './OwnLunches';
 import JoinedLunches from './JoinedLunches';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
-import {AccountCircle} from "@material-ui/icons";
-import FilterLunches from './FilterLunches'
+import { AccountCircle } from '@material-ui/icons';
+import FilterLunches from './FilterLunches';
+import LunchItem from './LunchItem';
 
 const authenticated = (authUser) => !!authUser;
 
@@ -112,8 +114,8 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: 2,
   },
   drawer: {
-    background: "#313131"
-  }
+    background: '#313131',
+  },
 }));
 
 const LunchesGrid = (props) => {
@@ -123,6 +125,7 @@ const LunchesGrid = (props) => {
   const [createLunchOpen, setCreateLunchOpen] = useState(false);
   const [ownExpanded, setOwnExpanded] = useState(false);
   const [joinedExpanded, setJoinedExpanded] = useState(false);
+  const [memberObj, setMemberObj] = useState(null);
 
   //create lunch attributes
   const [startDate, setStartDate] = useState(new Date());
@@ -139,11 +142,16 @@ const LunchesGrid = (props) => {
     const fetchLunchData = async () => {
       let newLunch = [];
       const querySnapshot = await firebase.getFreeLunches();
-      const sortedSnapshot = await firebase.sortLunchesByInterests(querySnapshot);
+      const sortedSnapshot = await firebase.sortLunchesByInterests(
+        querySnapshot,
+      );
       sortedSnapshot.forEach((doc) => {
         console.log(doc);
-        if(!doc.members.includes(firebase.auth.currentUser.uid)
-            && !(doc.owner==firebase.auth.currentUser.uid)){
+
+        if (
+          !doc.members.includes(firebase.auth.currentUser.uid) &&
+          !(doc.owner == firebase.auth.currentUser.uid)
+        ) {
           newLunch.push(doc);
         }
       });
@@ -173,16 +181,22 @@ const LunchesGrid = (props) => {
     return count > 0;
   }
 
-    //onclick openProfile
-    const toggleDrawer = (open) => event => {
-        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        setDrawerOpen(open);
-    };
+  //onclick openProfile
+  const toggleDrawer = (open) => (event) => {
+    if (
+      event &&
+      event.type === 'keydown' &&
+      (event.key === 'Tab' || event.key === 'Shift')
+    ) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
 
   let showLunches = (
-    <div className="hello">You haven't created any Lunches. See that red plus in the corner?</div>
+    <div className="hello">
+      You haven't created any Lunches. See that red plus in the corner?
+    </div>
   );
   if (countOwnLunches()) {
     showLunches = (
@@ -264,8 +278,8 @@ const LunchesGrid = (props) => {
           <Collapse in={joinedExpanded} timeout="auto" unmountOnExit>
             <CardContent>
               <JoinedLunches
-                  updateLunches={updateLunches}
-                  setUpdateLunches={setUpdateLunches}
+                updateLunches={updateLunches}
+                setUpdateLunches={setUpdateLunches}
               />
             </CardContent>
           </Collapse>
@@ -290,9 +304,12 @@ const LunchesGrid = (props) => {
       startTimeStamp,
       memberCount,
       maxMembers,
-      id
+      id,
+      members,
+      owner,
     } = lunch;
 
+    const allMembers = [...members, owner];
     const startTime = startTimeStamp
       .toDate()
       .toLocaleTimeString()
@@ -319,75 +336,37 @@ const LunchesGrid = (props) => {
     ));
 
     return (
-      // The grid breakpoints are for responsive Design, DO NOT CHANGE
-      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
-        <Card>
-          {/* No style needed, spacing of grid handles everything! */}
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography color="textSecondary" component="p">
-              {description}
-            </Typography>
-            <div>{chips}</div>
-            <br />
-            <Divider component="div" />
-            <br />
-            <Table>
-              <tbody>
-                <tr>
-                  <td className={classes.column}>Mensa</td>
-                  <td>{mensa}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Date</td>
-                  <td>{date}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Time</td>
-                  <td>
-                    {startTime} - {endTime}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-            <br />
-            <Button
-              variant="outlined"
-              className={classes.button}
-              size="small"
-              style={{
-                color: '#DB4444',
-                borderColor: '#DB4444',
-                marginBottom: '-8px',
-              }}
-              href="#"
-              onClick={() => onJoinLunch(id)}
-            >
-              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
-            </Button>
-          </CardContent>
-        </Card>
-      </Grid>
+      <LunchItem
+        members={allMembers}
+        id={id}
+        index={index}
+        title={title}
+        description={description}
+        chips={chips}
+        mensa={mensa}
+        date={date}
+        startTime={startTime}
+        endTime={endTime}
+        memberCount={memberCount}
+        maxMembers={maxMembers}
+        onJoinLunch={onJoinLunch}
+      />
     );
   });
 
   function onJoinLunch(id) {
     const props1 = props;
     firebase
-        .joinLunch(
-            id
-        )
-        .then(function() {
-          props1.enqueueSnackbar('Lunch joined!', {
-            variant: 'success',
-          });
-          setCreateLunchOpen(false);
-          setUpdateLunches(!updateLunches);
-          countJoinedLunches()
-        })
-        .catch();
+      .joinLunch(id)
+      .then(function() {
+        props1.enqueueSnackbar('Lunch joined!', {
+          variant: 'success',
+        });
+        setCreateLunchOpen(false);
+        setUpdateLunches(!updateLunches);
+        countJoinedLunches();
+      })
+      .catch();
   }
 
   function onCreateLunch() {
@@ -435,22 +414,27 @@ const LunchesGrid = (props) => {
           <Grid container spacing={1}>
             <Grid item xs={6}>
               <IconButton
-                  aria-label="Account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  edge="end"
-                  onClick={toggleDrawer(true)}
-                  color="inherit">
-                <AccountCircle/>
+                aria-label="Account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                edge="end"
+                onClick={toggleDrawer(true)}
+                color="inherit"
+              >
+                <AccountCircle />
               </IconButton>
             </Grid>
             <Grid item xs={6}>
-              <Typography component="h1" variant="h3" style={{ marginBottom: 16 }}>
+              <Typography
+                component="h1"
+                variant="h3"
+                style={{ marginBottom: 16 }}
+              >
                 Your Lunches
               </Typography>
             </Grid>
           </Grid>
-          
+
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               {showLunches}
@@ -572,13 +556,14 @@ const LunchesGrid = (props) => {
         </DialogActions>
       </Dialog>
 
-        <SwipeableDrawer
-            open={drawerOpen}
-            classes={{ paper: classes.drawer }}
-            onClose={toggleDrawer(false)}
-            onOpen={toggleDrawer(true)}>
-            <Profile/>
-        </SwipeableDrawer>
+      <SwipeableDrawer
+        open={drawerOpen}
+        classes={{ paper: classes.drawer }}
+        onClose={toggleDrawer(false)}
+        onOpen={toggleDrawer(true)}
+      >
+        <Profile />
+      </SwipeableDrawer>
     </div>
   );
 };
