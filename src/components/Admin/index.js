@@ -295,7 +295,7 @@ const Admin = (props) => {
                 onChangeIndex={handleChangeIndex}>
                 <TabContainer dir={theme.direction}>
                     <div>
-                        <Grid container direction="column" spacing={1}>
+                        <Grid container direction="column">
                             {loading ? (
                                 <CircularProgress/>
                             ):(
@@ -303,7 +303,9 @@ const Admin = (props) => {
                                     {lunchItems.length === 0 ? (
                                         <Typography variant='h4'>Looks like your job is done for today :)</Typography>
                                     ) : (
-                                        lunchItems
+                                        <Grid container direction="column" spacing={3}>
+                                            {lunchItems}
+                                        </Grid>
                                     )}
                                 </div>
                             )}
