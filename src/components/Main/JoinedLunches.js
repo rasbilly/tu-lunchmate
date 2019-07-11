@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 
 const JoinedLunches = (props) => {
   const classes = useStyles();
-  const { firebase, setUpdateLunches, updateLunches } = props;
+  const { firebase, setUpdateLunches, updateLunches, token} = props;
   const [joinedLunches, setJoinedLunches] = useState([]);
   const [hasUpdated, setHasUpdated] = useState(false);
   const [activeModal, setActiveModal] = useState(false);
@@ -53,7 +53,9 @@ const JoinedLunches = (props) => {
   }, [hasUpdated]);
 
   const leaveLunch = (id) => {
-    firebase.leaveLunch(id).then(() => {
+    firebase.leaveLunch(id).then(() => { 
+      //stop getting notifications for this lunch
+      firebase.unSubscribeFromLunch(id, token).catch((e)=>console.log(e));
       setHasUpdated(!hasUpdated);
       setUpdateLunches(!updateLunches);
     });

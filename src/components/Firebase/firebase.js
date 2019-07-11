@@ -2,6 +2,7 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore'
 import 'firebase/storage'
+import 'firebase/messaging'
 import * as firebase from "firebase";
 
 const config = {
@@ -27,9 +28,10 @@ class Firebase {
     this.auth = app.auth();
     this.db = app.firestore();
     this.storage = app.storage();
+    this.messaging = app.messaging();
     this.functions = app.functions();
+    this.messaging.usePublicVapidKey("BDdZqrqvhE6T0OWwOd6qpXIcHbHkwk8QUFW35mdgnBkZEKnkYyx3CqnzXiGvqWop0RP-KG9JxIxmeQEDnUVQ2xo");
   }
-
       //Auth functions
       signIn = (email, password) =>
         this.auth.signInWithEmailAndPassword(email, password);
@@ -193,6 +195,22 @@ class Firebase {
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
     userProfilePicsURL = (uid) => this.storage.ref('profile_pictures').getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
+
+    //cloud messaging pub/sub requests
+    subscribeToLunch = (lunchID, token) => {
+        const subscribe = this.functions.httpsCallable('registerUserToTopic');
+        return subscribe({
+            lunchID: lunchID,
+            token: token
+        })
+    };
+    unSubscribeFromLunch = (lunchID, token) => {
+        const unsubscribe = this.functions.httpsCallable('unsubscribeUserFromTopic');
+        return unsubscribe({
+            lunchID: lunchID,
+            token: token
+        })
+    };
 
     //admin related functionality
     deleteUserByEmail = (email) => {
