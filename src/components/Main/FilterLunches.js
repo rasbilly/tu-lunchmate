@@ -144,8 +144,8 @@ function FilterLunches({ firebase, setlunches }) {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <form className={classes.root} autoComplete="off">
-            <FormControl className={classes.formControl}>
+          <form className={classes.root} autoComplete="off" style={{ marginLeft: "1em", marginRight:"1em"}}>
+            <FormControl className={classes.formControl} >
               <InputLabel htmlFor="maxMembers">Amount</InputLabel>
               <Select
                 value={values.maxMembers}
@@ -191,7 +191,7 @@ function FilterLunches({ firebase, setlunches }) {
           open={Boolean(anchorEl2)}
           onClose={handleClose2}
         >
-          <form className={classes.root} autoComplete="off">
+          <form className={classes.root} autoComplete="off" style={{ marginLeft: "1em", marginRight:"1em"}}>
             <InterestsForm
               clickedInterests={clickedInterests}
               setClickedInterests={setClickedInterests}
@@ -223,7 +223,7 @@ function FilterLunches({ firebase, setlunches }) {
           open={Boolean(anchorEl3)}
           onClose={handleClose3}
         >
-          <form className={classes.root} autoComplete="off">
+          <form className={classes.root} autoComplete="off" style={{ marginLeft: "1em", marginRight:"1em"}}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <DateTimePicker
                 label="From"
