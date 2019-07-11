@@ -156,7 +156,7 @@ const LunchesGrid = (props) => {
     askPushNotifPermission();
     //listener to tokens
     firebase.messaging.onTokenRefresh(function () {
-      messaging.getToken()
+      firebase.messaging.getToken()
           .then(function(refreshedToken) {
             console.log('Token refreshed.');
             setToken(refreshedToken);
