@@ -188,8 +188,10 @@ class Firebase {
         });
     //Get user
     user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user
+    users = async() => await this.db.collection(users).get(); //this contains every relevant infos for a user
     //Get user profile picture url
     userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
+    userProfilePicsURL = (uid) => this.storage.ref('profile_pictures').getDownloadURL();
     sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 
     //admin related functionality

@@ -44,6 +44,7 @@ import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
 import { AccountCircle } from '@material-ui/icons';
 import FilterLunches from './FilterLunches';
+import LunchItem from './LunchItem';
 
 const authenticated = (authUser) => !!authUser;
 
@@ -332,66 +333,22 @@ const LunchesGrid = (props) => {
       />
     ));
 
-    const member = members.forEach((mem) => {
-      firebase.userProfilePicURL(mem).then(function(doc) {
-        console.log('mem: ' + doc);
-        return <Avatar key={mem.id} align="right" src={doc} />;
-      });
-    });
-
     return (
-      // The grid breakpoints are for responsive Design, DO NOT CHANGE
-      <Grid key={index} item xs={12} sm={6} md={4} lg={3} xl={3}>
-        <Card>
-          {/* No style needed, spacing of grid handles everything! */}
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography color="textSecondary" component="p">
-              {description}
-            </Typography>
-            <div>{member}</div>
-            <div>{chips}</div>
-            <br />
-            <Divider component="div" />
-            <br />
-            <Table>
-              <tbody>
-                <tr>
-                  <td className={classes.column}>Mensa</td>
-                  <td>{mensa}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Date</td>
-                  <td>{date}</td>
-                </tr>
-                <tr>
-                  <td className={classes.column}>Time</td>
-                  <td>
-                    {startTime} - {endTime}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-            <br />
-            <Button
-              variant="outlined"
-              className={classes.button}
-              size="small"
-              style={{
-                color: '#DB4444',
-                borderColor: '#DB4444',
-                marginBottom: '-8px',
-              }}
-              href="#"
-              onClick={() => onJoinLunch(id)}
-            >
-              Join ({memberCount}/{maxMembers}) {/* Brackets for context */}
-            </Button>
-          </CardContent>
-        </Card>
-      </Grid>
+      <LunchItem
+        members={members}
+        id={id}
+        index={index}
+        title={title}
+        description={description}
+        chips={chips}
+        mensa={mensa}
+        date={date}
+        startTime={startTime}
+        endTime={endTime}
+        memberCount={memberCount}
+        maxMembers={maxMembers}
+        onJoinLunch={onJoinLunch}
+      />
     );
   });
 
