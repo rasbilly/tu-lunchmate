@@ -25,6 +25,7 @@ import {
   Avatar,
 } from '@material-ui/core';
 import { withFirebase } from '../Firebase';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -116,10 +117,15 @@ const LunchItem = ({
   const [membersAvatars, setMembersAvatars] = useState([]);
   useEffect(() => {
     firebase.users().then(function(querySnapshot) {
+      let users = [];
       querySnapshot.forEach((doc) => {
-        members.forEach((member) => {
-          if (doc.id === member)
-            setMembersAvatars([...membersAvatars, doc.data().photoURL]);
+        users.push({ id: doc.id, ...doc.data() });
+      });
+      members.forEach((member) => {
+        users.filter((user) => {
+          if (user.id === member) {
+            setMembersAvatars([...membersAvatars, user]);
+          }
         });
       });
     });
@@ -137,9 +143,13 @@ const LunchItem = ({
           <Typography color="textSecondary" component="p">
             {description}
           </Typography>
-          {membersAvatars.map((avatar) => (
-            <Avatar key={avatar} align="right" src={avatar} />
-          ))}
+          <div>
+            {membersAvatars.map((avatar) => (
+              <Link key={avatar.id} to={`profile/${avatar.id}`}>
+                <Avatar align="right" src={avatar.photoURL} />
+              </Link>
+            ))}
+          </div>
           <div>{chips}</div>
           <br />
           <Divider component="div" />

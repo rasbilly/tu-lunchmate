@@ -1,49 +1,73 @@
-import React, {useEffect, useState} from 'react';
-import {withFirebase} from "../Firebase";
-import {Avatar, Typography, Grid, Container, CssBaseline} from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import { withFirebase } from '../Firebase';
+import {
+  Avatar,
+  Typography,
+  Grid,
+  Container,
+  CssBaseline,
+  Card,
+  CardHeader,
+  CardContent,
+  Chip,
+} from '@material-ui/core';
 
 const UserProfile = (props) => {
-    const {firebase, uid} = props;
-    const [userObj, setUserObj] = useState(null);
+  const { firebase, match, history } = props;
+  const [userObj, setUserObj] = useState(null);
 
-    const fetchUserData = () => {
-        firebase.user(uid).then(function (doc) {
-            setUserObj(doc.data());
-        })
-    };
+  const fetchUserData = () => {
+    firebase.user(match.params.id).then(function(doc) {
+      if (doc.exists) setUserObj(doc.data());
+      else history.push('/main');
+    });
+  };
 
-    useEffect(()=> {
-        fetchUserData();
-    },[]);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
-    return (
-        <Grid conatiner component="main" maxWidth="sm" direction="column">
-            <CssBaseline/>
-            <Grid item xs={12}>
-                <Avatar align='center' src={userObj && userObj.photoURL}/>
+  return (
+    <Container maxWidth="sm" style={{ marginTop: '2rem' }}>
+      <CssBaseline />
+      <Card>
+        <CardHeader
+          avatar={
+            <Avatar aria-label="Recipe" src={userObj && userObj.photoURL} />
+          }
+          title={userObj && userObj.name}
+          subheader={userObj && userObj.description}
+        />
+        <CardContent>
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <Typography>Major: </Typography>
             </Grid>
-            <Grid item xs={12}>
-                <Typography variant='h3'>{userObj && userObj.name}</Typography>
+            <Grid item xs={6}>
+              <Typography>{userObj && userObj.major}</Typography>
             </Grid>
-            <Grid item xs={12}>
-                <Typography variant='h4'>{userObj && userObj.description}</Typography>
+            <Grid item xs={6}>
+              <Typography>Interests: </Typography>
             </Grid>
-            <Grid container spacing={1}>
-                <Grid item xs={6}>
-                    <Typography>Major: </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography>{userObj && userObj.major}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography>Interests: </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    <Typography>{userObj && userObj.interests.join()}</Typography>
-                </Grid>
+            <Grid item xs={6}>
+              <Typography>
+                {userObj &&
+                  userObj.interests.map((interest) => (
+                    <Chip
+                      style={{ marginRight: '0.2rem' }}
+                      size="small"
+                      label={interest}
+                      color="primary"
+                      component={'div'}
+                    />
+                  ))}
+              </Typography>
             </Grid>
-        </Grid>
-    ); //TODO: interests as chips, proper formatting, loading icon before loading infos
+          </Grid>
+        </CardContent>
+      </Card>
+    </Container>
+  ); //TODO: interests as chips, proper formatting, loading icon before loading infos
 };
 
 export default withFirebase(UserProfile);
