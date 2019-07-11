@@ -92,7 +92,7 @@ class Firebase {
     //Main page requests
     createLunch = (title, description, interests, startTimeStamp, endTimeStamp, maxUsers, mensa) => {
         const uid = this.auth.currentUser.uid;
-        return this.db.collection(lunches).doc().set({
+        return this.db.collection(lunches).add({
             title: title,
             description: description,
             interests: interests,
@@ -148,7 +148,7 @@ class Firebase {
         return new Promise(function (resolve, reject) {
             ctx.db.collection(lunches).get().then(function (snapshot) {
                 const lunchList = snapshot.docs.map(doc => {
-                    var result = doc.data();
+                    const result = doc.data();
                     result.id = doc.id;
                     return result;
                 });
@@ -180,7 +180,6 @@ class Firebase {
         });
     };
     //profile page requests
-    setUserDesc = (description) => this.db.collection(users).doc(this.auth.currentUser.uid).set({description: description});
     updateUserInterests = (interests) => this.db.collection(users).doc(this.auth.currentUser.uid).update({interests: interests});
     //updating profile pic, etc. all the same as registration... so see above
     updateUserBio =  (major, description) => this.db.collection(users).doc(this.auth.currentUser.uid)
@@ -191,10 +190,6 @@ class Firebase {
     //Get user
     user = uid => this.db.collection(users).doc(uid).get(); //this contains every relevant infos for a user
     users = async() => await this.db.collection(users).get(); //this contains every relevant infos for a user
-    //Get user profile picture url
-    userProfilePicURL = (uid) => this.storage.ref('profile_pictures/'+uid).getDownloadURL();
-    userProfilePicsURL = (uid) => this.storage.ref('profile_pictures').getDownloadURL();
-    sendResetEmail = () => this.auth.sendPasswordResetEmail(this.auth.currentUser.email); //promise! snackbar in return
 
     //cloud messaging pub/sub requests
     subscribeToLunch = (lunchID, token) => {
@@ -240,9 +235,11 @@ class Firebase {
         })
     };
     getReportedLunches = () => this.db.collection(lunches).where("reportCount",">",0).get();
+
+    endDate;
     //filter
     async filter(values) {
-        let query = this.db.collection('lunches')
+        let query = this.db.collection('lunches');
 
         if(values.maxMembers) {
             query = query.where('maxMembers', '==', values.maxMembers)
@@ -252,9 +249,7 @@ class Firebase {
             query= query.where('startTimeStamp', '>=' , values.startDate)
             .where('startTimeStamp', '<=' , values.endDate)
         }
-        const lunches = await query.get()
-    
-        return lunches;
+        return await query.get();
     }
 }
 /*

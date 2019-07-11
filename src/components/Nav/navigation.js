@@ -30,8 +30,7 @@ function Navigation (props) {
             }
         </AuthUserContext.Consumer>
     );
-};
-
+}
 function NavigationAuth ({authUser, classes, firebase}) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);

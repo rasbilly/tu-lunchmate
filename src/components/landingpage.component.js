@@ -42,7 +42,7 @@ export default function LandingPage (props) {
                         Lunch with your classmates.
                     </Typography>
                     <Typography variant="h5" align="center" className={classes.text} color="textSecondary" paragraph>
-                        Eat and talk about common interests. <br/> I have no idea what else to put in here.
+                        Eat and talk about common interests. <br/> This is a student project within the scope of the course "Skalierbare Systeme" at TU Berlin.
                     </Typography>
                     <div className={classes.heroButtons}>
                         <Grid container spacing={2} justify="center">

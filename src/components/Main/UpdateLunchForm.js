@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import withAuthorization from '../Session/authorization';
 import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';

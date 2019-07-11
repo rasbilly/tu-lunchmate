@@ -6,7 +6,6 @@ import {
   Grid,
   Typography,
   Button,
-  Paper,
   Card,
   CardActions,
   CardContent,
@@ -14,21 +13,17 @@ import {
   Collapse,
   SwipeableDrawer,
   Fab,
-  Divider,
   Dialog,
   DialogActions,
-  DialogContentText,
   DialogTitle,
   DialogContent,
   TextField,
   Select,
   MenuItem,
   InputLabel,
-  Table,
 } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ReportIcon from '@material-ui/icons/ReportProblem';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   DateTimePicker,
@@ -36,7 +31,6 @@ import {
   TimePicker,
 } from '@material-ui/pickers';
 import AddIcon from '@material-ui/icons/Add';
-import CreateLunch from '../CreateLunch/CreateLunch';
 import Profile from '../Profile/Profile';
 import InterestsForm from '../Registration/InterestsForm';
 import OwnLunches from './OwnLunches';
@@ -217,7 +211,7 @@ const LunchesGrid = (props) => {
         const fetchOwnLunches = async () => {
           let z = 0;
           const qs = await firebase.getOwnLunches();
-          qs.forEach((doc) => {
+          qs.forEach(() => {
             z += 1;
           });
           setCount(z);
@@ -291,7 +285,7 @@ const LunchesGrid = (props) => {
         const fetchJoinedLunches = async () => {
           let y = 0;
           const queryS = await firebase.getJoinedLunches();
-          queryS.forEach((doc) => {
+          queryS.forEach(() => {
             y += 1;
           });
           setNum(y);
@@ -390,10 +384,7 @@ const LunchesGrid = (props) => {
     return (
       <LunchItem
         key={id}
-        setOpenReport={setOpenReport}
         members={allMembers}
-        setActiveId={setActiveId}
-        activeId={activeId}
         lunch={lunch}
         id={id}
         index={index}
@@ -449,7 +440,8 @@ const LunchesGrid = (props) => {
         maxMembers,
         mensa,
       )
-      .then(function(docref) {
+      .then(docref => {
+        console.log("document ref:",docref);
         //get notifications for this lunch
         firebase.subscribeToLunch(docref.id, token).catch((e)=>console.log(e));
         props1.enqueueSnackbar('Lunch created!', {

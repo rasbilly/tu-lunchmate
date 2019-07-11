@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {withFirebase} from "../Firebase";
 import {
     Avatar,
-    Button, CircularProgress, Container,
+    Button, CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Grid
 } from "@material-ui/core";
 import PhotoCamera from "@material-ui/core/SvgIcon/SvgIcon";
 import ReactCrop from "react-image-crop";
@@ -75,7 +74,7 @@ const ProfilePicSelecter = (props) => {
             crop.height
         );
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             canvas.toBlob(blob => {
                 if (!blob) {
                     //reject(new Error('Canvas is empty'));

@@ -7,7 +7,6 @@ import {
     Stepper,
     Button,
     StepLabel, CircularProgress,
-    Container
 } from '@material-ui/core';
 import RegistrationForm from './RegistrationForm';
 import ProfilePicForm from './ProfilePicForm';
@@ -97,6 +96,8 @@ const Registration = (props) => {
                         firebase.updateProfilePic(url).then(function () { //sets the profile in the auth db
                             console.log("success");
                             setFinished(true);
+                        }).catch(function (e) {
+                            console.error("error updating profilepic",e)
                         })
                     }).catch(function (error) {
                         console.error("error getting profileurl:",error);
@@ -178,7 +179,7 @@ const Registration = (props) => {
         setNextDisabled(
             0===firstName.length||0===email.length||0===password.length||0===password2.length //registration form
         );
-    });
+    }, [firstName.length, email.length, password.length, password2.length]);
 
     return (
     <main className={classes.layout}>

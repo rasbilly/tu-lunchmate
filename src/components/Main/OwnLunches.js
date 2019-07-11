@@ -3,17 +3,8 @@ import { withFirebase } from '../Firebase';
 import {
   makeStyles,
   Grid,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardActions,
   Chip,
-  Divider,
-  Table,
 } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import UpdateLunchForm from './UpdateLunchForm';
 import LunchItem from './LunchItem';
 
@@ -61,7 +52,7 @@ const OwnLunches = (props) => {
       setOwnLunches(newOwnLunches);
     };
     fetchOwnLunchData();
-  }, [hasUpdated]);
+  }, [firebase, hasUpdated]);
 
   const deleteLunch = (id) => {
     firebase.deleteLunch(id).then(() => {

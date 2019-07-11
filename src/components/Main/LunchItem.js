@@ -95,7 +95,6 @@ const useStyles = makeStyles((theme) => ({
 
 const LunchItem = ({
   id,
-  index,
   title,
   description,
   chips,
@@ -143,7 +142,7 @@ const LunchItem = ({
 
       setMembersAvatars(allMembers);
     });
-  }, []);
+  }, [firebase, members]);
 
   function handleClick(id) {
     setUserID(id);
@@ -152,7 +151,7 @@ const LunchItem = ({
 
   return (
     <React.Fragment>
-      <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
+      <Grid item xs={12} sm={6} md={updateLunch || leaveLunch ? 6 : 4} lg={updateLunch || leaveLunch ? 6 : 3}>
         <Card>
           <CardContent>
             {setOpenReport ? (

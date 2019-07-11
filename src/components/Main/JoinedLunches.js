@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import { withFirebase } from '../Firebase';
 import {
   makeStyles,
   Grid,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardActions,
   Chip,
-  Divider,
-  Table,
 } from '@material-ui/core';
 import LunchItem from './LunchItem';
 
