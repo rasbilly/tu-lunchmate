@@ -204,7 +204,7 @@ const Admin = (props) => {
     function checkUser() {
         firebase.auth.onAuthStateChanged(function (user) {
             firebase.user(user.uid).then(function (user) {
-                if(!user.isAdmin) {
+                if(!user.data().isAdmin) {
                     history.push("/main");
                 }
             })
